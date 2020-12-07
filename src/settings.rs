@@ -20,6 +20,10 @@ pub struct Settings {
     #[structopt(long, env = "IMAP_PASSWORD", hide_env_values = true)]
     pub imap_password: String,
 
+    /// For local testing, turn of certificate validation
+    #[structopt(long)]
+    pub imap_allow_untrusted: bool,
+
     /// Existing directory for writing blog content (e.g., _posts)
     #[structopt(long, env = "POSTS_DIR")]
     pub posts_dir: PathBuf,

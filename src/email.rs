@@ -1,34 +1,31 @@
 use chrono::{DateTime, TimeZone, Utc};
 use imap;
 use mailparse::*;
-use native_tls;
 use mime_db;
+use native_tls;
 
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 
 use super::blog::{Image, PostInfo, Thumbnail};
+use super::filenames::Filenames;
 use super::settings::Settings;
 use super::signatureblock;
-use super::filenames::Filenames;
 
 use super::mishaps::Mishap;
 
 use super::image::thumbnail;
 
 pub fn fetch(settings: &Settings) -> Result<Option<String>, Mishap> {
+    let tls = native_tls::TlsConnector::builder()
+        .danger_accept_invalid_certs(settings.imap_allow_untrusted)
+        .build()?;
 
-    // let tls = native_tls::TlsConnector::builder().build()?;
-    // let client = imap::connect(
-    //     (&settings.imap_hostname[..], settings.imap_port),
-    //     &settings.imap_hostname,
-    //     &tls,
-    // )?;
-
-    // If using local test Greemail server with no TLS:
-    let client = imap::connect_insecure(
+    let client = imap::connect(
         (&settings.imap_hostname[..], settings.imap_port),
+        &settings.imap_hostname,
+        &tls,
     )?;
 
     let mut imap_session = client
@@ -71,7 +68,6 @@ pub fn parse(mime_msg: &str) -> Result<ParsedMail, Mishap> {
 }
 
 pub fn extract(settings: &Settings, mail: ParsedMail) -> Result<PostInfo, Mishap> {
-
     let sender: String = sender(&mail)?.unwrap_or_else(|| String::from("Someone"));
     let subject: Option<String> = mail.headers.get_first_value("Subject");
     let content: Option<String> = body(&mail)?.map(signatureblock::remove);
@@ -173,7 +169,6 @@ fn attachments(
     let mut images = Vec::new();
 
     for (count, part) in find_attachemnts(&mail).iter().enumerate() {
-
         let ext = mime_db::extension(&part.ctype.mimetype);
 
         let filename = conventions.attachment_fullsize_filename(count, ext);
@@ -206,4 +201,3 @@ fn save_raw_body(filename: &Path, bytes: Vec<u8>) -> Result<File, Mishap> {
     file.write_all(bytes.as_slice())?;
     Ok(file)
 }
-
