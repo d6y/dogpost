@@ -6,9 +6,9 @@ use settings::Settings;
 
 mod blog;
 mod email;
+mod filenames;
 mod image;
 mod mishaps;
-mod filenames;
 mod signatureblock;
 
 fn main() {
@@ -27,12 +27,14 @@ fn main() {
     match email::fetch(&settings) {
         Err(err) => {
             print!("{:?}", err);
-            stop("mailbox access", err) },   // Failed accessing mail box
+            stop("mailbox access", err)
+        } // Failed accessing mail box
         Ok(None) => complete(0), // No messages to process
         Ok(Some(mime_message)) => {
             match email::parse(&mime_message).and_then(extract) {
                 Err(err) => stop("msg parse", err), // Message processing failed
-                Ok(info) => match blog::write(&info) { // { .and_then(upload) {
+                Ok(info) => match blog::write(&info) {
+                    // { .and_then(upload) {
                     Err(err) => stop("Blog write", err),
                     Ok(_) => complete(1),
                 },

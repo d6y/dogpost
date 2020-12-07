@@ -20,5 +20,4 @@ pub enum Mishap {
 
     #[error(transparent)]
     File(#[from] std::io::Error),
-
 }

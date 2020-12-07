@@ -29,7 +29,7 @@ pub struct Settings {
     pub posts_dir: PathBuf,
 
     /// Temporary directory for writing media files prior to upload
-    #[structopt(long, env = "MEDIA_DIR" )]
+    #[structopt(long, env = "MEDIA_DIR")]
     pub media_dir: PathBuf,
 
     /// Thumbnail width
