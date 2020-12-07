@@ -64,10 +64,7 @@ pub fn write(post: &PostInfo) -> Result<&PostInfo, Mishap> {
         write!(
             &markdown,
             r#"<a href="{}"><img src="{}" width="{}" height="{}"></a>"#,
-            image.url,
-            image.thumbnail.url,
-            image.thumbnail.width,
-            image.thumbnail.height
+            image.url, image.thumbnail.url, image.thumbnail.width, image.thumbnail.height
         )?;
         write!(&markdown, "\n\n")?;
     }
@@ -75,9 +72,9 @@ pub fn write(post: &PostInfo) -> Result<&PostInfo, Mishap> {
     Ok(post)
 }
 
-
-// TODO: Featured... namely first image as: image: url (inline url path?)
 fn post_meta(post: &PostInfo) -> String {
+    let featured_image = post.attachments.first().map(|img| &img.url);
+
     format!(
         r#"---
 title: |
@@ -86,9 +83,13 @@ author: {}
 date: {}
 layout: post
 comments: true
+{}
 ---"#,
         post.title,
         post.author,
         post.date.format("%Y-%m-%d %H:%M"),
+        featured_image
+            .map(|url| format!("image: {}", url))
+            .unwrap_or("".to_string())
     )
 }
