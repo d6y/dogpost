@@ -49,7 +49,7 @@ Set up something like Thunderbird to send mail to local SMTP and collect from lo
 Run this code with something like:
 
 ```
-cargo run -- --imap-password 1234 --imap-hostname 127.0.0.1 --imap-port 3143 --imap-user dog@127.0.0.1 --posts-dir ./pt --s3-bucket xxx --s3-key yyy --s3-secret zzz
+cargo run -- --imap-password 1234 --imap-hostname 127.0.0.1 --imap-port 3143 --imap-user dog@127.0.0.1 --posts-dir ./tmp --media-dir ./tmp --s3-bucket xxx --s3-key yyy --s3-secret zzz
 ```
 
 
