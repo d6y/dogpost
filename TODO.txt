@@ -1,0 +1,17 @@
+Skit email from accounts.google.com
+as they may be notifications or secuirty notices
+
+Perhaps only process emails from me or jane?
+
+
+richard@Soap _posts % rg '^\-\- '                                                                                  [master]
+2018-09-08-can-t-get-over-it--better-go-around-it.md
+21:--
+
+2018-09-02-i-went-to-instow-beach-earlier-and-i-loved-playing-in-the-sea.md
+25:--
+
+2018-09-04-i-went-to-the-broomhill-sculpture-gardens-today.md
+29:--
+
+
