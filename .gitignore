@@ -3,3 +3,8 @@ target
 .classpath
 /.cache
 *.sublime-*
+
+
+# Added by cargo
+
+/target
