@@ -7,12 +7,21 @@ edition = "2018"
 [dependencies]
 structopt = "0.3"
 clap = "2.33"
+
 imap = "2.3"
 native-tls = "0.2" 
 mailparse = "0.13"
 mime-db = "1.1.0"
+
 regex = "1.4"
+
 chrono = "0.4"
-rust-s3 = "0.26"
+
 slug = "0.1"
+
 thiserror = "1.0"
+
+rusoto_core = "0.45"
+rusoto_s3 = "0.45"
+futures = "0.3"
+tokio = { version = "0.2", features = ["full"] }

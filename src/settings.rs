@@ -44,11 +44,4 @@ pub struct Settings {
     #[structopt(long, env = "S3_BUCKET")]
     pub s3_bucket: String,
 
-    /// S3 key
-    #[structopt(long, env = "S3_KEY")]
-    pub s3_key: String,
-
-    /// S3 secret
-    #[structopt(long, env = "S3_SECRET", hide_env_values = true)]
-    pub s3_secret: String,
 }

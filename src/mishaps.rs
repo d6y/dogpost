@@ -1,3 +1,4 @@
+use rusoto_s3::PutObjectError;
 use thiserror::Error;
 
 use imap;
@@ -20,4 +21,7 @@ pub enum Mishap {
 
     #[error(transparent)]
     File(#[from] std::io::Error),
+
+    #[error(transparent)]
+    S3(#[from] rusoto_core::RusotoError<PutObjectError>),
 }

@@ -9,7 +9,10 @@ mod email;
 mod filenames;
 mod image;
 mod mishaps;
+mod s3;
 mod signatureblock;
+
+use tokio::runtime::Builder;
 
 fn main() {
     let settings = Settings::from_args();
@@ -25,18 +28,22 @@ fn main() {
     };
 
     match email::fetch(&settings) {
-        Err(err) => {
-            print!("{:?}", err);
-            stop("mailbox access", err)
-        } // Failed accessing mail box
-        Ok(None) => complete(0), // No messages to process
+        Err(err) => stop("mailbox access", err), // Failed accessing mail box
+        Ok(None) => complete(0),                 // No messages to process
         Ok(Some(mime_message)) => {
             match email::parse(&mime_message).and_then(extract) {
                 Err(err) => stop("msg parse", err), // Message processing failed
                 Ok(info) => match blog::write(&info) {
-                    // { .and_then(upload) {
                     Err(err) => stop("Blog write", err),
-                    Ok(_) => complete(1),
+                    Ok(info) => {
+                        let mut rt = Builder::new()
+                            .enable_all()
+                            .threaded_scheduler()
+                            .build()
+                            .unwrap();
+                        rt.block_on(s3::upload(&settings, info)).expect("s3 upload");
+                        complete(1)
+                    }
                 },
             }
         }
