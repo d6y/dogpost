@@ -14,6 +14,8 @@ mod signatureblock;
 
 use tokio::runtime::Builder;
 
+// TODO: implement an allow list of at least domains
+
 fn main() {
     let settings = Settings::from_args();
 
@@ -51,7 +53,7 @@ fn main() {
 }
 
 fn stop(context: &str, err: Mishap) -> ! {
-    eprintln!("{}: Failed: {}", context, err);
+    eprintln!("{context}: Failed: {err}", context=context, err=err);
     std::process::exit(1)
 }
 
