@@ -14,8 +14,6 @@ mod signatureblock;
 
 use tokio::runtime::Builder;
 
-// TODO: implement an allow list of at least domains
-
 fn main() {
     let settings = Settings::from_args();
 
