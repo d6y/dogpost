@@ -16,7 +16,7 @@ You need to supply:
 
 The subject is used as the title of the blog post and the filename. It will then delete the email (archive it).
 
-## Serving suggestion
+## Serving suggestion
 
 Run via cron, and wrapper in a script that either commits and pushes to your GitHub hosted telegr.am blog, or move to a Dropbox folder.
 
