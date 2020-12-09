@@ -152,11 +152,11 @@ fn to_vec<T>(o: Option<T>) -> Vec<T> {
     }
 }
 
-fn find_attachemnts<'a>(mail: &'a ParsedMail<'a>) -> Vec<&'a ParsedMail<'a>> {
+fn find_attachments<'a>(mail: &'a ParsedMail<'a>) -> Vec<&'a ParsedMail<'a>> {
     let head: Vec<&ParsedMail> =
         to_vec(Some(mail).filter(|m| m.ctype.mimetype.starts_with("image")));
 
-    let tail = mail.subparts.iter().map(|m| find_attachemnts(m)).flatten();
+    let tail = mail.subparts.iter().map(|m| find_attachments(m)).flatten();
 
     head.into_iter().chain(tail).collect()
 }
@@ -168,7 +168,7 @@ fn attachments(
 ) -> Result<Vec<Image>, Mishap> {
     let mut images = Vec::new();
 
-    for (count, part) in find_attachemnts(&mail).iter().enumerate() {
+    for (count, part) in find_attachments(&mail).iter().enumerate() {
         let ext = mime_db::extension(&part.ctype.mimetype);
 
         let filename = conventions.attachment_fullsize_filename(count, ext);
