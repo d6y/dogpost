@@ -68,7 +68,34 @@ pub fn parse(mime_msg: &str) -> Result<ParsedMail, Mishap> {
 }
 
 pub fn extract(settings: &Settings, mail: ParsedMail) -> Result<PostInfo, Mishap> {
-    let sender: String = sender(&mail)?.unwrap_or_else(|| String::from("Someone"));
+    validate_sender(settings, &mail).and_then(|_| read_post(&settings, mail))
+}
+
+fn validate_sender(settings: &Settings, mail: &ParsedMail) -> Result<(), Mishap> {
+    let from_address: Option<String> = from(mail)?;
+
+    if settings.allowed_domains.is_empty() {
+        Ok(())
+    } else {
+        match from_address {
+            None => Err(Mishap::MissingSender),
+            Some(email) => {
+                let matching_domain = settings
+                    .allowed_domains
+                    .iter()
+                    .find(|&d| email.ends_with(d));
+                if matching_domain.is_none() {
+                    Err(Mishap::Unauthorised(email))
+                } else {
+                    Ok(())
+                }
+            }
+        }
+    }
+}
+
+fn read_post(settings: &Settings, mail: ParsedMail) -> Result<PostInfo, Mishap> {
+    let sender: String = sender_name(&mail)?.unwrap_or_else(|| String::from("Someone"));
     let subject: Option<String> = mail.headers.get_first_value("Subject");
     let content: Option<String> = body(&mail)?.map(signatureblock::remove);
     let date: DateTime<Utc> = date(&mail)?.unwrap_or_else(Utc::now);
@@ -111,18 +138,27 @@ fn date(mail: &ParsedMail) -> Result<Option<DateTime<Utc>>, Mishap> {
     }
 }
 
-fn sender(mail: &ParsedMail) -> Result<Option<String>, MailParseError> {
+fn walk_from_header<F>(mail: &ParsedMail, pick: F) -> Result<Option<String>, MailParseError>
+where
+    F: Fn(SingleInfo) -> Option<String>,
+{
     let sender_text: Option<String> = mail.headers.get_first_value("From");
     match sender_text {
         None => Ok(None),
         Some(str) => match addrparse(&str) {
             Err(err) => Err(err),
             Ok(addrs) if addrs.is_empty() => Ok(None),
-            Ok(addrs) => Ok(addrs
-                .extract_single_info()
-                .and_then(|info| info.display_name)),
+            Ok(addrs) => Ok(addrs.extract_single_info().and_then(|info| pick(info))),
         },
     }
+}
+
+fn sender_name(mail: &ParsedMail) -> Result<Option<String>, MailParseError> {
+    walk_from_header(mail, |info| info.display_name)
+}
+
+fn from(mail: &ParsedMail) -> Result<Option<String>, MailParseError> {
+    walk_from_header(mail, |info| Some(info.addr))
 }
 
 fn body(mail: &ParsedMail) -> Result<Option<String>, MailParseError> {

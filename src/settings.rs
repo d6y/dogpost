@@ -44,4 +44,8 @@ pub struct Settings {
     #[structopt(long, env = "S3_BUCKET")]
     pub s3_bucket: String,
 
+    /// Allow list of sender domains. If empty, all are allowed.
+    #[structopt(long, env = "DOMAINS_ALLOW")]
+    pub allowed_domains: Vec<String>,
+
 }

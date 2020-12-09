@@ -24,4 +24,10 @@ pub enum Mishap {
 
     #[error(transparent)]
     S3(#[from] rusoto_core::RusotoError<PutObjectError>),
+
+    #[error("No FROM address found")]
+    MissingSender,
+
+    #[error("Sender {0} not in allowed list of domains")]
+    Unauthorised(String),
 }
