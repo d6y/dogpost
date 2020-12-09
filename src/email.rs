@@ -189,7 +189,7 @@ fn attachments(
             file: filename,
             url: conventions.attachment_fullsize_url(count, ext),
             thumbnail,
-            mimetype: mail.ctype.mimetype.clone(),
+            mimetype: part.ctype.mimetype.clone(),
         });
     }
 
