@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::Path;
 
 use super::blog::PostInfo;
 use super::mishaps::Mishap;
@@ -27,7 +27,7 @@ pub async fn upload(settings: &Settings, post: &PostInfo) -> Result<(), Mishap> 
     Ok(())
 }
 
-fn put_request(bucket: &str, path: &PathBuf, content_type: &str) -> PutObjectRequest {
+fn put_request(bucket: &str, path: &Path, content_type: &str) -> PutObjectRequest {
     // TODO: https://stackoverflow.com/questions/57810173/streamed-upload-to-s3-with-rusoto
     let bytes = std::fs::read(path).ok();
     PutObjectRequest {
@@ -36,7 +36,7 @@ fn put_request(bucket: &str, path: &PathBuf, content_type: &str) -> PutObjectReq
             .file_name()
             .map(|v| v.to_string_lossy().to_string())
             .unwrap(),
-        body: bytes.map(|b| StreamingBody::from(b)),
+        body: bytes.map(StreamingBody::from),
         content_type: Some(content_type.to_string()),
         acl: Some(String::from("public-read")),
         ..Default::default()

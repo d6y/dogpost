@@ -1,8 +1,8 @@
 [package]
 name = "dogpost"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Richard Dallaway <richard@dallaway.com>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 structopt = "0.3"
@@ -21,7 +21,7 @@ slug = "0.1"
 
 thiserror = "1.0"
 
-rusoto_core = "0.45"
-rusoto_s3 = "0.45"
+rusoto_core = "0.47"
+rusoto_s3 = "0.47"
 futures = "0.3"
-tokio = { version = "0.2", features = ["full"] }
+tokio = { version = "1", features = ["full"] }

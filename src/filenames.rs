@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use std::path::PathBuf;
+use std::path::Path;
 
 pub struct Filenames {
     media_dir: PathBuf,
@@ -66,17 +67,17 @@ impl Filenames {
     }
 
     pub fn new(
-        media_dir: &PathBuf,
-        posts_dir: &PathBuf,
+        media_dir: &Path,
+        posts_dir: &Path,
         bucket: &str,
         date: &DateTime<Utc>,
         slug: &str,
     ) -> Filenames {
         Filenames {
-            media_dir: media_dir.clone(),
-            posts_dir: posts_dir.clone(),
+            media_dir: media_dir.to_path_buf(),
+            posts_dir: posts_dir.to_path_buf(),
             bucket: bucket.to_string(),
-            date: date.clone(),
+            date: *date,
             slug: slug.to_string(),
         }
     }

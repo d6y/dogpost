@@ -1,10 +1,6 @@
 use rusoto_s3::PutObjectError;
 use thiserror::Error;
 
-use imap;
-use mailparse;
-use native_tls;
-
 #[derive(Error, Debug)]
 pub enum Mishap {
     #[error(transparent)]

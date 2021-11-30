@@ -1,8 +1,8 @@
 use std::io::{Error, ErrorKind};
-use std::path::PathBuf;
+use std::path::Path;
 use std::process::Command;
 
-pub fn thumbnail(source: &PathBuf, target: &PathBuf, width: u16) -> Result<(u16, u16), Error> {
+pub fn thumbnail(source: &Path, target: &Path, width: u16) -> Result<(u16, u16), Error> {
     let _convert_status = Command::new("convert")
         .arg(&source)
         .arg("-resize")

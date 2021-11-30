@@ -1,8 +1,5 @@
 use chrono::{DateTime, TimeZone, Utc};
-use imap;
 use mailparse::*;
-use mime_db;
-use native_tls;
 
 use std::fs::File;
 use std::io::Write;
@@ -68,7 +65,7 @@ pub fn parse(mime_msg: &str) -> Result<ParsedMail, Mishap> {
 }
 
 pub fn extract(settings: &Settings, mail: ParsedMail) -> Result<PostInfo, Mishap> {
-    validate_sender(settings, &mail).and_then(|_| read_post(&settings, mail))
+    validate_sender(settings, &mail).and_then(|_| read_post(settings, mail))
 }
 
 fn validate_sender(settings: &Settings, mail: &ParsedMail) -> Result<(), Mishap> {
@@ -133,8 +130,8 @@ fn date(mail: &ParsedMail) -> Result<Option<DateTime<Utc>>, Mishap> {
         None => Ok(None),
         Some(str) => dateparse(&str)
             .map_err(|e| Mishap::EmailField(e.to_string()))
-            .map(|seconds| Utc.timestamp_millis(1000 as i64 * seconds))
-            .map(|utc| Some(utc)),
+            .map(|seconds| Utc.timestamp_millis(1000_i64 * seconds))
+            .map(Some),
     }
 }
 
@@ -168,7 +165,7 @@ fn body(mail: &ParsedMail) -> Result<Option<String>, MailParseError> {
         Ok(None)
     } else {
         let parts: Result<Vec<Option<String>>, MailParseError> =
-            mail.subparts.iter().map(|m| body(&m)).collect();
+            mail.subparts.iter().map(|m| body(m)).collect();
 
         let valid_parts: Result<Vec<String>, MailParseError> =
             parts.map(|os| os.into_iter().flatten().collect());
@@ -204,7 +201,7 @@ fn attachments(
 ) -> Result<Vec<Image>, Mishap> {
     let mut images = Vec::new();
 
-    for (count, part) in find_attachments(&mail).iter().enumerate() {
+    for (count, part) in find_attachments(mail).iter().enumerate() {
         let ext = mime_db::extension(&part.ctype.mimetype);
 
         let filename = conventions.attachment_fullsize_filename(count, ext);

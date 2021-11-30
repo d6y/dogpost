@@ -12,7 +12,7 @@ mod mishaps;
 mod s3;
 mod signatureblock;
 
-use tokio::runtime::Builder;
+use tokio::runtime::Runtime;
 
 fn main() {
     let settings = Settings::from_args();
@@ -36,11 +36,7 @@ fn main() {
                 Ok(info) => match blog::write(&info) {
                     Err(err) => stop("Blog write", err),
                     Ok(info) => {
-                        let mut rt = Builder::new()
-                            .enable_all()
-                            .threaded_scheduler()
-                            .build()
-                            .unwrap();
+                        let rt = Runtime::new().unwrap();
                         rt.block_on(s3::upload(&settings, info)).expect("s3 upload");
                         complete(1)
                     }
