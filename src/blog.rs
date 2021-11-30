@@ -55,11 +55,6 @@ pub fn write(post: &PostInfo) -> Result<&PostInfo, Mishap> {
     write!(&markdown, "{}", post_meta(post))?;
     write!(&markdown, "\n\n")?;
 
-    match &post.content {
-        Some(text) => write!(&markdown, "{}\n\n", text)?,
-        None => {}
-    };
-
     for image in post.attachments.iter() {
         write!(
             &markdown,
@@ -68,6 +63,11 @@ pub fn write(post: &PostInfo) -> Result<&PostInfo, Mishap> {
         )?;
         write!(&markdown, "\n\n")?;
     }
+
+    match &post.content {
+        Some(text) => write!(&markdown, "{}\n\n", text)?,
+        None => {}
+    };
 
     Ok(post)
 }
