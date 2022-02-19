@@ -6,7 +6,6 @@ edition = "2021"
 
 [dependencies]
 structopt = "0.3"
-clap = "2.33"
 
 imap = "2.3"
 native-tls = "0.2" 
