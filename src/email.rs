@@ -29,7 +29,7 @@ pub fn fetch(settings: &Settings) -> Result<Option<String>, Mishap> {
         .login(&settings.imap_user, &settings.imap_password)
         .map_err(|(err, _client)| err)?;
 
-    imap_session.select("INBOX")?;
+    imap_session.select(&settings.mailbox)?;
 
     // fetch message number 1 in this mailbox, along with its RFC822 field.
     // RFC 822 dictates the format of the body of e-mails
