@@ -47,7 +47,7 @@ fn main() {
 }
 
 fn stop(context: &str, err: Mishap) -> ! {
-    eprintln!("{context}: Failed: {err}", context=context, err=err);
+    eprintln!("{context}: Failed: {err}", context = context, err = err);
     std::process::exit(1)
 }
 

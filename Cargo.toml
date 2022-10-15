@@ -1,26 +1,21 @@
 [package]
 name = "dogpost"
-version = "0.1.1"
+version = "2.0.0"
 authors = ["Richard Dallaway <richard@dallaway.com>"]
 edition = "2021"
 
 [dependencies]
 structopt = "0.3"
+regex = "1.5"
+chrono = "0.4"
+slug = "0.1"
+thiserror = "1.0"
 
-imap = "2.3"
-native-tls = "0.2" 
 mailparse = "0.13"
 mime-db = "1.1.0"
 
-regex = "1.5"
-
-chrono = "0.4"
-
-slug = "0.1"
-
-thiserror = "1.0"
-
-rusoto_core = "0.47"
-rusoto_s3 = "0.47"
+imap = { version = "3.0.0-alpha.9", default-features = false, features=["rustls-tls"]  }
+rusoto_core = { version="0.48.0", default_features=false, features=["rustls"] }
+rusoto_s3 = { version="0.48.0", default_features=false, features=["rustls"] }
 futures = "0.3"
-tokio = { version = "1", features = ["full"] }
+tokio = { version = "1.0", default-features = false, features = ["sync", "macros", "rt"] }

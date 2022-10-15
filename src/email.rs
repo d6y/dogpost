@@ -15,15 +15,7 @@ use super::mishaps::Mishap;
 use super::image::thumbnail;
 
 pub fn fetch(settings: &Settings) -> Result<Option<String>, Mishap> {
-    let tls = native_tls::TlsConnector::builder()
-        .danger_accept_invalid_certs(settings.imap_allow_untrusted)
-        .build()?;
-
-    let client = imap::connect(
-        (&settings.imap_hostname[..], settings.imap_port),
-        &settings.imap_hostname,
-        &tls,
-    )?;
+    let client = imap::ClientBuilder::new(&settings.imap_hostname, settings.imap_port).rustls()?;
 
     let mut imap_session = client
         .login(&settings.imap_user, &settings.imap_password)
@@ -49,7 +41,7 @@ pub fn fetch(settings: &Settings) -> Result<Option<String>, Mishap> {
         .to_string();
 
     if settings.expunge {
-        imap_session.store(sequence_set.to_string(), "+FLAGS (\\Seen \\Deleted)")?;
+        imap_session.store(sequence_set, "+FLAGS (\\Seen \\Deleted)")?;
         let _msg_sequence_numbers = imap_session.expunge()?;
     }
 
@@ -145,7 +137,7 @@ where
         Some(str) => match addrparse(&str) {
             Err(err) => Err(err),
             Ok(addrs) if addrs.is_empty() => Ok(None),
-            Ok(addrs) => Ok(addrs.extract_single_info().and_then(|info| pick(info))),
+            Ok(addrs) => Ok(addrs.extract_single_info().and_then(pick)),
         },
     }
 }
@@ -165,7 +157,7 @@ fn body(mail: &ParsedMail) -> Result<Option<String>, MailParseError> {
         Ok(None)
     } else {
         let parts: Result<Vec<Option<String>>, MailParseError> =
-            mail.subparts.iter().map(|m| body(m)).collect();
+            mail.subparts.iter().map(body).collect();
 
         let valid_parts: Result<Vec<String>, MailParseError> =
             parts.map(|os| os.into_iter().flatten().collect());
@@ -189,7 +181,7 @@ fn find_attachments<'a>(mail: &'a ParsedMail<'a>) -> Vec<&'a ParsedMail<'a>> {
     let head: Vec<&ParsedMail> =
         to_vec(Some(mail).filter(|m| m.ctype.mimetype.starts_with("image")));
 
-    let tail = mail.subparts.iter().map(|m| find_attachments(m)).flatten();
+    let tail = mail.subparts.iter().flat_map(find_attachments);
 
     head.into_iter().chain(tail).collect()
 }

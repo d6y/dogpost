@@ -1,6 +1,6 @@
 # Dogpost
 
-Reads an IMAP email account and writes attachments to S3 and creates a Markdown file for Telegr.am or Jekyll.
+Reads an IMAP email account and writes attachments to S3 and commits a Jekyll-style markdown post file to Github.
 
 ## How use use
 
@@ -13,6 +13,8 @@ You need to supply:
 - S3 bucket name
 - S3 key
 - S3 secret
+- Github personal token
+- Github repository (user, branch)
 
 The subject is used as the title of the blog post and the filename. It will then delete the email (archive it).
 

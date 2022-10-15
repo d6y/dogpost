@@ -51,5 +51,4 @@ pub struct Settings {
     /// Allow list of sender domains. If empty, all are allowed.
     #[structopt(long, env = "DOMAINS_ALLOW")]
     pub allowed_domains: Vec<String>,
-
 }
