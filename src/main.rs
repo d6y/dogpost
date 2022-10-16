@@ -39,7 +39,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Ok(info) => match blog::write(&info) {
                     Err(err) => stop("Blog write", err),
                     Ok(content) => {
-                        let path_name = format!("{}/{}", &settings.posts_path, info.file_path);
+                        let path_name = format!("{}/{}", &settings.github_path, info.file_path);
                         let commit_msg = format!("add post: {}", info.title);
                         gh.commit(&path_name, &content, &commit_msg).await?;
                         s3::upload(&settings, &info).await?

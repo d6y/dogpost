@@ -18,10 +18,11 @@ The subject is used as the title of the blog post and the filename.
 ## Serving suggestion
 
 ```
-AWS_ACCESS_KEY_ID=??? AWS_SECRET_ACCESS_KEY=?? cargo run -- \
+AWS_ACCESS_KEY_ID=??? AWS_SECRET_ACCESS_KEY=??? cargo run -- \
   --imap-password 1234 --imap-user you@example.org \
-  --posts-dir ./tmp --media-dir ./tmp \
-  --s3-bucket static.skitters.dallaway.com
+  --media-dir ./tmp --s3-bucket static.example.com \
+  --github-token ??? --github-repo user/repo --github-branch main \
+  --github-path _posts \
   --expurge
 ```
 

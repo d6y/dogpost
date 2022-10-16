@@ -58,5 +58,5 @@ pub struct Settings {
 
     /// Path in GitHub repostory for writing blog content (e.g., _posts)
     #[arg(long, env = "GITHUB_PATH", default_value = "_posts")]
-    pub posts_path: String,
+    pub github_path: String,
 }

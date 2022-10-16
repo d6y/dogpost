@@ -25,7 +25,6 @@ pub fn thumbnail(source: &Path, target: &Path, width: u16) -> Result<(u16, u16),
 
     if width_height.len() != 2 {
         let msg = format!("Expected wxh, not: {:?}", output_text);
-        // eprintln!("{}", &msg);
         let cause = Error::new(ErrorKind::InvalidData, msg);
         Err(cause)
     } else {
