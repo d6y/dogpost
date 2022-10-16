@@ -1,6 +1,5 @@
 use super::mishaps::Mishap;
 use chrono::{DateTime, Utc};
-use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
 
@@ -11,7 +10,7 @@ pub struct PostInfo {
     pub content: Option<String>,
     pub date: DateTime<Utc>,
     pub attachments: Vec<Image>,
-    pub filename: PathBuf,
+    pub file_path: String,
 }
 
 #[derive(Debug)]
@@ -37,7 +36,7 @@ impl PostInfo {
         content: Option<String>,
         date: DateTime<Utc>,
         attachments: Vec<Image>,
-        filename: PathBuf,
+        file_path: String,
     ) -> PostInfo {
         PostInfo {
             title: title.trim().to_owned(),
@@ -45,31 +44,31 @@ impl PostInfo {
             content: content.map(|str| str.trim().to_owned()),
             date,
             attachments,
-            filename,
+            file_path,
         }
     }
 }
 
-pub fn write(post: &PostInfo) -> Result<&PostInfo, Mishap> {
-    let markdown = File::create(&post.filename)?;
-    write!(&markdown, "{}", post_meta(post))?;
-    write!(&markdown, "\n\n")?;
+pub fn write(post: &PostInfo) -> Result<String, Mishap> {
+    let mut markdown = Vec::new();
+    write!(markdown, "{}", post_meta(post))?;
+    write!(markdown, "\n\n")?;
 
     for image in post.attachments.iter() {
         write!(
-            &markdown,
+            markdown,
             r#"<a href="{}"><img src="{}" width="{}" height="{}"></a>"#,
             image.url, image.thumbnail.url, image.thumbnail.width, image.thumbnail.height
         )?;
-        write!(&markdown, "\n\n")?;
+        write!(markdown, "\n\n")?;
     }
 
     match &post.content {
-        Some(text) => write!(&markdown, "{}\n\n", text)?,
+        Some(text) => write!(markdown, "{}\n\n", text)?,
         None => {}
     };
 
-    Ok(post)
+    Ok(String::from_utf8(markdown)?)
 }
 
 fn post_meta(post: &PostInfo) -> String {

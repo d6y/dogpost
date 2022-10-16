@@ -13,6 +13,9 @@ pub enum Mishap {
     EmailField(String),
 
     #[error(transparent)]
+    PostEncoding(#[from] std::string::FromUtf8Error),
+
+    #[error(transparent)]
     File(#[from] std::io::Error),
 
     #[error(transparent)]

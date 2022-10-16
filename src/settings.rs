@@ -24,10 +24,6 @@ pub struct Settings {
     #[arg(short, long, default_value = "INBOX")]
     pub mailbox: String,
 
-    /// Existing directory for writing blog content (e.g., _posts)
-    #[arg(long, env = "POSTS_DIR")]
-    pub posts_dir: PathBuf,
-
     /// Temporary directory for writing media files prior to upload
     #[arg(long, env = "MEDIA_DIR")]
     pub media_dir: PathBuf,
@@ -59,4 +55,8 @@ pub struct Settings {
     /// Github repository branch
     #[arg(long, env = "GITHUB_BRANCH", default_value = "main")]
     pub github_branch: String,
+
+    /// Path in GitHub repostory for writing blog content (e.g., _posts)
+    #[arg(long, env = "GITHUB_PATH", default_value = "_posts")]
+    pub posts_path: String,
 }

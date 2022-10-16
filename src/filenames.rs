@@ -4,7 +4,6 @@ use std::path::PathBuf;
 
 pub struct Filenames {
     media_dir: PathBuf,
-    posts_dir: PathBuf,
     bucket: String,
     date: DateTime<Utc>,
     slug: String,
@@ -59,23 +58,13 @@ impl Filenames {
         path
     }
 
-    pub fn post_filename(&self) -> PathBuf {
-        let filename = format!("{}-{}.md", self.date.format("%Y-%m-%d"), self.slug);
-        let mut path = self.posts_dir.clone();
-        path.push(filename);
-        path
+    pub fn post_filename(&self) -> String {
+        format!("{}-{}.md", self.date.format("%Y-%m-%d"), self.slug)
     }
 
-    pub fn new(
-        media_dir: &Path,
-        posts_dir: &Path,
-        bucket: &str,
-        date: &DateTime<Utc>,
-        slug: &str,
-    ) -> Filenames {
+    pub fn new(media_dir: &Path, bucket: &str, date: &DateTime<Utc>, slug: &str) -> Filenames {
         Filenames {
             media_dir: media_dir.to_path_buf(),
-            posts_dir: posts_dir.to_path_buf(),
             bucket: bucket.to_string(),
             date: *date,
             slug: slug.to_string(),

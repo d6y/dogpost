@@ -98,13 +98,7 @@ fn read_post(settings: &Settings, mail: ParsedMail) -> Result<PostInfo, Mishap> 
 
     let slug = slug::slugify(&title);
 
-    let conventions = Filenames::new(
-        &settings.media_dir,
-        &settings.posts_dir,
-        &settings.s3_bucket,
-        &date,
-        &slug,
-    );
+    let conventions = Filenames::new(&settings.media_dir, &settings.s3_bucket, &date, &slug);
 
     let attachments = attachments(&conventions, settings.width, &mail)?;
 

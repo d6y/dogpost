@@ -34,10 +34,6 @@ fn main() {
         std::fs::create_dir_all(&settings.media_dir).expect("creating media dir")
     };
 
-    if !settings.posts_dir.exists() {
-        std::fs::create_dir_all(&settings.posts_dir).expect("creating posts dir")
-    };
-
     match email::fetch(&settings) {
         Err(err) => stop("mailbox access", err), // Failed accessing mail box
         Ok(None) => complete(0),                 // No messages to process
@@ -46,9 +42,10 @@ fn main() {
                 Err(err) => stop("msg parse", err), // Message processing failed
                 Ok(info) => match blog::write(&info) {
                     Err(err) => stop("Blog write", err),
-                    Ok(info) => {
+                    Ok(content) => {
                         let rt = Runtime::new().unwrap();
-                        rt.block_on(s3::upload(&settings, info)).expect("s3 upload");
+                        rt.block_on(s3::upload(&settings, &info))
+                            .expect("s3 upload");
                         complete(1)
                     }
                 },
