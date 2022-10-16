@@ -1,5 +1,3 @@
-use base64;
-use reqwest;
 use serde::Deserialize;
 use serde_json::json;
 use serde_json::Value;
@@ -38,7 +36,7 @@ impl Github {
         commit_msg: &str,
     ) -> Result<(), Box<dyn std::error::Error>> {
         let oid = self.get_oid().await?;
-        self.add_file(&oid, &path_name, content, &commit_msg).await
+        self.add_file(&oid, path_name, content, commit_msg).await
     }
 
     async fn get_oid(&self) -> Result<String, Box<dyn std::error::Error>> {
