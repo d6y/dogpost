@@ -24,10 +24,6 @@ pub struct Settings {
     #[structopt(short, long, default_value = "INBOX")]
     pub mailbox: String,
 
-    /// For local testing, turn of certificate validation
-    #[structopt(long)]
-    pub imap_allow_untrusted: bool,
-
     /// Existing directory for writing blog content (e.g., _posts)
     #[structopt(long, env = "POSTS_DIR")]
     pub posts_dir: PathBuf,
@@ -51,4 +47,16 @@ pub struct Settings {
     /// Allow list of sender domains. If empty, all are allowed.
     #[structopt(long, env = "DOMAINS_ALLOW")]
     pub allowed_domains: Vec<String>,
+
+    /// Github bearer token
+    #[structopt(long, env = "GITHUB_TOKEN")]
+    pub github_token: String,
+
+    /// Github repository in the form "user/repo"
+    #[structopt(long, env = "GITHUB_REPO")]
+    pub github_repo: String,
+
+    /// Github repository branch
+    #[structopt(long, env = "GITHUB_BRANCH", default_value = "main")]
+    pub github_branch: String,
 }

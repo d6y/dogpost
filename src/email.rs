@@ -20,6 +20,7 @@ pub fn fetch(settings: &Settings) -> Result<Option<String>, Mishap> {
     let mut imap_session = client
         .login(&settings.imap_user, &settings.imap_password)
         .map_err(|(err, _client)| err)?;
+    println!("B");
 
     imap_session.select(&settings.mailbox)?;
 

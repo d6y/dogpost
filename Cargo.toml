@@ -11,11 +11,16 @@ chrono = "0.4"
 slug = "0.1"
 thiserror = "1.0"
 
+base64 = "0.13"
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+reqwest = { version = "0.11", default_features = false, features = ["rustls-tls", "json"] }
+
 mailparse = "0.13"
 mime-db = "1.1.0"
-
 imap = { version = "3.0.0-alpha.9", default-features = false, features=["rustls-tls"]  }
 rusoto_core = { version="0.48.0", default_features=false, features=["rustls"] }
 rusoto_s3 = { version="0.48.0", default_features=false, features=["rustls"] }
+
 futures = "0.3"
 tokio = { version = "1.0", default-features = false, features = ["sync", "macros", "rt"] }

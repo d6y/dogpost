@@ -1,26 +1,21 @@
 # Dogpost
 
-Reads an IMAP email account and writes attachments to S3 and commits a Jekyll-style markdown post file to Github.
+Converts an email into a blog post.
+
+Reads an IMAP email account, writes attachments to S3, and commits a Jekyll-style markdown post file to Github.
 
 ## How use use
 
 You need to supply:
 
-- path to write the markdown blog post to
-- path to write image files
-- Google email adrress
-- Address password
-- S3 bucket name
-- S3 key
-- S3 secret
-- Github personal token
-- Github repository (user, branch)
+- paths to write the markdown blog post and image files
+- Google email address and password
+- S3 bucket name, key, secret
+- Github personal token, repository (user, branch)
 
-The subject is used as the title of the blog post and the filename. It will then delete the email (archive it).
+The subject is used as the title of the blog post and the filename. 
 
 ## Serving suggestion
-
-Run via cron, and wrapper in a script that either commits and pushes to your GitHub hosted telegr.am blog, or move to a Dropbox folder.
 
 ```
 AWS_ACCESS_KEY_ID=??? AWS_SECRET_ACCESS_KEY=?? cargo run -- \

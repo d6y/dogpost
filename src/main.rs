@@ -7,12 +7,23 @@ use settings::Settings;
 mod blog;
 mod email;
 mod filenames;
+mod github;
 mod image;
 mod mishaps;
 mod s3;
 mod signatureblock;
 
 use tokio::runtime::Runtime;
+
+// #[tokio::main]
+// async fn main() {
+
+//     let g = github::Github::new("TOKEN", "d6y/scratch", "main");
+//     let oid = dbg!(g.get_oid().await);
+
+//     let x = dbg!(g.add_file("OID", "_posts/foo1.md", "From code 1", "add foo1.md").await);
+
+// }
 
 fn main() {
     let settings = Settings::from_args();
