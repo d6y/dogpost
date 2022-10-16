@@ -1,6 +1,6 @@
 use mishaps::Mishap;
-use structopt::StructOpt;
 
+use clap::Parser;
 mod settings;
 use settings::Settings;
 
@@ -26,7 +26,7 @@ use tokio::runtime::Runtime;
 // }
 
 fn main() {
-    let settings = Settings::from_args();
+    let settings = Settings::parse();
 
     let extract = |msg| email::extract(&settings, msg);
 

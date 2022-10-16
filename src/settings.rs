@@ -1,62 +1,62 @@
+use clap::Parser;
 use std::path::PathBuf;
-use structopt::StructOpt;
 
-#[derive(Debug, StructOpt)]
-#[structopt(global_settings(&[structopt::clap::AppSettings::DeriveDisplayOrder]))]
+#[derive(Debug, Parser)]
+#[command(version, about, long_about = None)]
 pub struct Settings {
     /// IMAP hostname to connect to
-    #[structopt(long, default_value = "imap.gmail.com", env = "IMAP_HOSTNAME")]
+    #[arg(long, default_value = "imap.gmail.com", env = "IMAP_HOSTNAME")]
     pub imap_hostname: String,
 
     /// IMAP port number
-    #[structopt(long, default_value = "993", env = "IMAP_PORT")]
+    #[arg(long, default_value = "993", env = "IMAP_PORT")]
     pub imap_port: u16,
 
     /// Email address (or user account) to check on the IMAP server
-    #[structopt(long, env = "IMAP_USER")]
+    #[arg(long, env = "IMAP_USER")]
     pub imap_user: String,
 
     /// Password for authentication
-    #[structopt(long, env = "IMAP_PASSWORD", hide_env_values = true)]
+    #[arg(long, env = "IMAP_PASSWORD", hide_env_values = true)]
     pub imap_password: String,
 
     // The mailbox to read from
-    #[structopt(short, long, default_value = "INBOX")]
+    #[arg(short, long, default_value = "INBOX")]
     pub mailbox: String,
 
     /// Existing directory for writing blog content (e.g., _posts)
-    #[structopt(long, env = "POSTS_DIR")]
+    #[arg(long, env = "POSTS_DIR")]
     pub posts_dir: PathBuf,
 
     /// Temporary directory for writing media files prior to upload
-    #[structopt(long, env = "MEDIA_DIR")]
+    #[arg(long, env = "MEDIA_DIR")]
     pub media_dir: PathBuf,
 
     /// Thumbnail width
-    #[structopt(short, long, default_value = "500")]
+    #[arg(short, long, default_value = "500")]
     pub width: u16,
 
     /// Archive the email after processing
-    #[structopt(short, long)]
+    #[arg(short, long)]
     pub expunge: bool,
 
     /// S3 bucketname
-    #[structopt(long, env = "S3_BUCKET")]
+    #[arg(long, env = "S3_BUCKET")]
     pub s3_bucket: String,
 
     /// Allow list of sender domains. If empty, all are allowed.
-    #[structopt(long, env = "DOMAINS_ALLOW")]
+    #[arg(long, env = "DOMAINS_ALLOW")]
     pub allowed_domains: Vec<String>,
 
     /// Github bearer token
-    #[structopt(long, env = "GITHUB_TOKEN")]
+    #[arg(long, env = "GITHUB_TOKEN", hide_env_values = true)]
     pub github_token: String,
 
     /// Github repository in the form "user/repo"
-    #[structopt(long, env = "GITHUB_REPO")]
+    #[arg(long, env = "GITHUB_REPO")]
     pub github_repo: String,
 
     /// Github repository branch
-    #[structopt(long, env = "GITHUB_BRANCH", default_value = "main")]
+    #[arg(long, env = "GITHUB_BRANCH", default_value = "main")]
     pub github_branch: String,
 }
