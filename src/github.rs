@@ -31,7 +31,17 @@ struct RepoObject {
 }
 
 impl Github {
-    pub async fn get_oid(&self) -> Result<String, Box<dyn std::error::Error>> {
+    pub async fn commit(
+        &self,
+        path_name: &str,
+        content: &str,
+        commit_msg: &str,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let oid = self.get_oid().await?;
+        self.add_file(&oid, &path_name, content, &commit_msg).await
+    }
+
+    async fn get_oid(&self) -> Result<String, Box<dyn std::error::Error>> {
         let url = format!(
             "https://api.github.com/repos/{}/git/ref/heads/{}",
             self.repo, self.branch
@@ -56,7 +66,7 @@ impl Github {
         }
     }
 
-    pub async fn add_file(
+    async fn add_file(
         &self,
         oid: &str,
         path_name: &str,

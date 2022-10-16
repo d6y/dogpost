@@ -1,3 +1,4 @@
+use github::Github;
 use mishaps::Mishap;
 
 use clap::Parser;
@@ -13,26 +14,21 @@ mod mishaps;
 mod s3;
 mod signatureblock;
 
-use tokio::runtime::Runtime;
-
-// #[tokio::main]
-// async fn main() {
-
-//     let g = github::Github::new("TOKEN", "d6y/scratch", "main");
-//     let oid = dbg!(g.get_oid().await);
-
-//     let x = dbg!(g.add_file("OID", "_posts/foo1.md", "From code 1", "add foo1.md").await);
-
-// }
-
-fn main() {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let settings = Settings::parse();
-
-    let extract = |msg| email::extract(&settings, msg);
 
     if !settings.media_dir.exists() {
         std::fs::create_dir_all(&settings.media_dir).expect("creating media dir")
     };
+
+    let gh = Github::new(
+        &settings.github_token,
+        &settings.github_repo,
+        &settings.github_branch,
+    );
+
+    let extract = |msg| email::extract(&settings, msg);
 
     match email::fetch(&settings) {
         Err(err) => stop("mailbox access", err), // Failed accessing mail box
@@ -43,15 +39,17 @@ fn main() {
                 Ok(info) => match blog::write(&info) {
                     Err(err) => stop("Blog write", err),
                     Ok(content) => {
-                        let rt = Runtime::new().unwrap();
-                        rt.block_on(s3::upload(&settings, &info))
-                            .expect("s3 upload");
-                        complete(1)
+                        let path_name = format!("{}/{}", &settings.posts_path, info.file_path);
+                        let commit_msg = format!("add post: {}", info.title);
+                        gh.commit(&path_name, &content, &commit_msg).await?;
+                        s3::upload(&settings, &info).await?
                     }
                 },
             }
         }
     }
+
+    Ok(())
 }
 
 fn stop(context: &str, err: Mishap) -> ! {
