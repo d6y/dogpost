@@ -10,7 +10,7 @@ You need to supply:
 
 - paths to write the markdown blog post and image files
 - Google email address and password
-- S3 bucket name, key, secret
+- S3 bucket name, key, secret (as environment variables only)
 - Github personal token, repository (user, branch)
 
 The subject is used as the title of the blog post and the filename. 
@@ -28,18 +28,11 @@ AWS_ACCESS_KEY_ID=??? AWS_SECRET_ACCESS_KEY=??? cargo run -- \
 
 NB: `--expurge` will archive/delete the email after processing.
 
-
-# Building for Linux on macOS
-
-```
-docker pull clux/muslrust
-docker run -v $PWD:/volume -t clux/muslrust cargo build --release
-```
-
-The binary will be:
+# Docker build
 
 ```
-target/x86_64-unknown-linux-musl/release/dogpost
+docker build -t dogpost .
+docker run -it --rm --name running-dogpost dogpost
 ```
 
 # License
