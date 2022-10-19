@@ -22,6 +22,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         std::fs::create_dir_all(&settings.media_dir).expect("creating media dir")
     };
 
+    ensure_imagemagik_installed();
+
     let gh = Github::new(
         &settings.github_token,
         &settings.github_repo,
@@ -60,4 +62,10 @@ fn stop(context: &str, err: Mishap) -> ! {
 fn complete(num_msgs: usize) -> ! {
     println!("{}", num_msgs);
     std::process::exit(0)
+}
+
+fn ensure_imagemagik_installed() {
+    if !image::imagemagic_installed() {
+        panic!("Did not find ImageMagik");
+    }
 }
