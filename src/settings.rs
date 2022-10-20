@@ -21,7 +21,7 @@ pub struct Settings {
     pub imap_password: String,
 
     // The mailbox to read from
-    #[arg(short, long, default_value = "INBOX")]
+    #[arg(short, long, default_value = "INBOX", env = "MAILBOX")]
     pub mailbox: String,
 
     /// Temporary directory for writing media files prior to upload
