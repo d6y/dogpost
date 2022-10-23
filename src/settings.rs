@@ -33,7 +33,7 @@ pub struct Settings {
     pub width: u16,
 
     /// Archive the email after processing
-    #[arg(short, long)]
+    #[arg(short, long, env = "EXPURGE")]
     pub expunge: bool,
 
     /// S3 bucketname
