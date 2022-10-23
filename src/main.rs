@@ -1,4 +1,5 @@
 use github::Github;
+use log::info;
 use mishaps::Mishap;
 
 use clap::Parser;
@@ -17,6 +18,8 @@ mod signatureblock;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let settings = Settings::parse();
+
+    env_logger::init();
 
     if !settings.media_dir.exists() {
         std::fs::create_dir_all(&settings.media_dir).expect("creating media dir")
@@ -60,7 +63,7 @@ fn stop(context: &str, err: Mishap) -> ! {
 }
 
 fn complete(num_msgs: usize) -> ! {
-    println!("{}", num_msgs);
+    info!("{}", num_msgs);
     std::process::exit(0)
 }
 

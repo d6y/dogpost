@@ -23,8 +23,19 @@ pub fn fetch(settings: &Settings) -> Result<Option<String>, Mishap> {
 
     imap_session.select(&settings.mailbox)?;
 
-    // fetch message number 1 in this mailbox, along with its RFC822 field.
-    // RFC 822 dictates the format of the body of e-mails
+    let uids = imap_session.fetch("1:*", "UID").expect("Failed to list UIDs");
+    for uid in uids.iter().flat_map(|f| f.uid) {
+        debug!("UID found: {}", uid);
+    }
+
+    let messages = if let Some(uid) = &settings.email_uid {
+        info!("Handing {}", uid);
+        imap_session.uid_fetch(uid.to_string(), "RFC822")?
+    } else {
+        // fetch message number 1 in this mailbox
+        debug!("Fetching first messsage");
+        imap_session.fetch("1", "RFC822")?
+    };
 
     let sequence_set = "1";
     let messages = imap_session.fetch(sequence_set, "RFC822")?;
@@ -34,6 +45,8 @@ pub fn fetch(settings: &Settings) -> Result<Option<String>, Mishap> {
         return Ok(None);
     };
 
+    panic!("ENOUGH");
+
     // The body will be the mime content of the message (including heeader)
     let body = message.body().expect("message did not have a body!");
     let body = std::str::from_utf8(body)
@@ -41,7 +54,11 @@ pub fn fetch(settings: &Settings) -> Result<Option<String>, Mishap> {
         .to_string();
 
     if settings.expunge {
-        imap_session.store(sequence_set, "+FLAGS (\\Seen \\Deleted)")?;
+        if let Some(uid) = &settings.email_uid {
+            imap_session.uid_store(uid.to_string(), "+FLAGS (\\Seen \\Deleted)")?;
+        } else {
+            imap_session.store("1", "+FLAGS (\\Seen \\Deleted)")?;
+        };
         let _msg_sequence_numbers = imap_session.expunge()?;
     }
 
