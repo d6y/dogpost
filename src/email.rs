@@ -1,4 +1,5 @@
 use chrono::{DateTime, TimeZone, Utc};
+use log::debug;
 use mailparse::*;
 
 use std::fs::File;
@@ -15,37 +16,26 @@ use super::mishaps::Mishap;
 use super::image::thumbnail;
 
 pub fn fetch(settings: &Settings) -> Result<Option<String>, Mishap> {
+    debug!("Fetching");
     let client = imap::ClientBuilder::new(&settings.imap_hostname, settings.imap_port).rustls()?;
 
     let mut imap_session = client
         .login(&settings.imap_user, &settings.imap_password)
         .map_err(|(err, _client)| err)?;
 
+    debug!("Selecting mailbox: {}", &settings.mailbox);
     imap_session.select(&settings.mailbox)?;
 
-    let uids = imap_session.fetch("1:*", "UID").expect("Failed to list UIDs");
-    for uid in uids.iter().flat_map(|f| f.uid) {
-        debug!("UID found: {}", uid);
-    }
+    // fetch message number 1 in this mailbox
+    let messages = imap_session.fetch("1", "RFC822")?;
+    debug!("Messages: {:?}", messages.len());
 
-    let messages = if let Some(uid) = &settings.email_uid {
-        info!("Handing {}", uid);
-        imap_session.uid_fetch(uid.to_string(), "RFC822")?
-    } else {
-        // fetch message number 1 in this mailbox
-        debug!("Fetching first messsage");
-        imap_session.fetch("1", "RFC822")?
-    };
-
-    let sequence_set = "1";
-    let messages = imap_session.fetch(sequence_set, "RFC822")?;
     let message = if let Some(m) = messages.iter().next() {
         m
     } else {
+        imap_session.logout()?;
         return Ok(None);
     };
-
-    panic!("ENOUGH");
 
     // The body will be the mime content of the message (including heeader)
     let body = message.body().expect("message did not have a body!");
@@ -54,11 +44,7 @@ pub fn fetch(settings: &Settings) -> Result<Option<String>, Mishap> {
         .to_string();
 
     if settings.expunge {
-        if let Some(uid) = &settings.email_uid {
-            imap_session.uid_store(uid.to_string(), "+FLAGS (\\Seen \\Deleted)")?;
-        } else {
-            imap_session.store("1", "+FLAGS (\\Seen \\Deleted)")?;
-        };
+        imap_session.store("1", "+FLAGS (\\Seen \\Deleted)")?;
         let _msg_sequence_numbers = imap_session.expunge()?;
     }
 
