@@ -12,7 +12,7 @@ pub struct Filenames {
 impl Filenames {
     pub fn attachment_fullsize_url(&self, count: usize, ext: Option<&str>) -> String {
         format!(
-            "http://{}/{}-{}-fullsize-{}.{}",
+            "//{}/{}-{}-fullsize-{}.{}",
             self.bucket,
             self.date.format("%Y-%m-%d"),
             self.slug,
@@ -23,7 +23,7 @@ impl Filenames {
 
     pub fn attachment_thumb_url(&self, count: usize, ext: Option<&str>) -> String {
         format!(
-            "http://{}/{}-{}-thumb-{}.{}",
+            "//{}/{}-{}-thumb-{}.{}",
             self.bucket,
             self.date.format("%Y-%m-%d"),
             self.slug,
