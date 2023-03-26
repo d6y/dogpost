@@ -1,6 +1,6 @@
 [package]
 name = "dogpost"
-version = "2.0.0"
+version = "3.0.0"
 authors = ["Richard Dallaway <richard@dallaway.com>"]
 edition = "2021"
 
@@ -21,8 +21,6 @@ reqwest = { version = "0.11", default_features = false, features = ["rustls-tls"
 mailparse = "0.14"
 mime-db = "1"
 imap = { version = "3.0.0-alpha.9", default-features = false, features=["rustls-tls"]  }
-rusoto_core = { version="0.48.0", default_features=false, features=["rustls"] }
-rusoto_s3 = { version="0.48.0", default_features=false, features=["rustls"] }
 
 futures = "0.3"
 tokio = { version = "1", default-features = false, features = ["sync", "macros", "rt"] }
