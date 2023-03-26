@@ -1,8 +1,8 @@
+use clap::Parser;
 use github::Github;
 use log::info;
 use mishaps::Mishap;
 use tempfile::TempDir;
-use clap::Parser;
 
 mod settings;
 use settings::Settings;
@@ -12,7 +12,6 @@ mod filenames;
 mod github;
 mod image;
 mod mishaps;
-mod s3;
 mod signatureblock;
 
 #[tokio::main]
@@ -31,7 +30,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         &settings.github_branch,
     );
 
-    let extract = |msg| email::extract(&settings, msg);
+    let extract = |msg| email::extract(&settings, working_dir.path(), msg);
 
     match email::fetch(&settings) {
         Err(err) => stop("mailbox access", err), // Failed accessing mail box
@@ -42,10 +41,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Ok(info) => match blog::write(&info) {
                     Err(err) => stop("Blog write", err),
                     Ok(content) => {
-                        let path_name = format!("{}/{}", &settings.github_path, info.file_path);
+                        let path_name =
+                            format!("{}/{}", &settings.github_post_path, info.file_path);
                         let commit_msg = format!("add post: {}", info.title);
                         gh.commit(&path_name, &content, &commit_msg).await?;
-                        s3::upload(&settings, &info).await?
                     }
                 },
             }

@@ -1,5 +1,4 @@
 use clap::Parser;
-use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]
@@ -51,4 +50,8 @@ pub struct Settings {
     /// Path in GitHub repostory for writing image content (e.g., img/posts)
     #[arg(long, env = "GITHUB_MEDIA_PATH", default_value = "static/media/%Y/%m")]
     pub github_media_path: String,
+
+    /// Path to media folder for images on the web server
+    #[arg(long, env = "GITHUB_MEDIA_PATH", default_value = "/media/%Y/%m")]
+    pub web_media_path: String,
 }

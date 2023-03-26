@@ -3,7 +3,6 @@ use chrono::{DateTime, Utc};
 use std::io::Write;
 use std::path::PathBuf;
 
-
 #[derive(Debug)]
 pub struct PostInfo {
     pub title: String,
@@ -18,6 +17,7 @@ pub struct PostInfo {
 pub struct Attachment {
     pub file_path: PathBuf,
     pub url_path: String,
+    pub github_path: String,
 }
 
 impl PostInfo {
@@ -46,7 +46,7 @@ pub fn write(post: &PostInfo) -> Result<String, Mishap> {
     write!(markdown, "\n\n")?;
 
     for image in post.attachments.iter() {
-        write!(markdown, r#"![]({})"#, image.url_path);
+        write!(markdown, r#"![]({})"#, image.url_path)?;
         write!(markdown, "\n\n")?;
     }
 
@@ -59,7 +59,6 @@ pub fn write(post: &PostInfo) -> Result<String, Mishap> {
 }
 
 fn post_meta(post: &PostInfo) -> String {
-
     // TODO: use Serde YAML
 
     let featured_image = post.attachments.first().map(|img| &img.url_path);

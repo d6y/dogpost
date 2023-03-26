@@ -1,4 +1,3 @@
-use rusoto_s3::PutObjectError;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -17,9 +16,6 @@ pub enum Mishap {
 
     #[error(transparent)]
     File(#[from] std::io::Error),
-
-    #[error(transparent)]
-    S3(#[from] rusoto_core::RusotoError<PutObjectError>),
 
     #[error("No FROM address found")]
     MissingSender,

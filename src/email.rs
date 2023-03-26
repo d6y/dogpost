@@ -13,8 +13,6 @@ use super::signatureblock;
 
 use super::mishaps::Mishap;
 
-use super::image::thumbnail;
-
 pub fn fetch(settings: &Settings) -> Result<Option<String>, Mishap> {
     debug!("Fetching");
     let client = imap::ClientBuilder::new(&settings.imap_hostname, settings.imap_port).rustls()?;
@@ -59,8 +57,12 @@ pub fn parse(mime_msg: &str) -> Result<ParsedMail, Mishap> {
     Ok(result)
 }
 
-pub fn extract(settings: &Settings, mail: ParsedMail) -> Result<PostInfo, Mishap> {
-    validate_sender(settings, &mail).and_then(|_| read_post(settings, mail))
+pub fn extract(
+    settings: &Settings,
+    working_dir: &Path,
+    mail: ParsedMail,
+) -> Result<PostInfo, Mishap> {
+    validate_sender(settings, &mail).and_then(|_| read_post(settings, working_dir, mail))
 }
 
 fn validate_sender(settings: &Settings, mail: &ParsedMail) -> Result<(), Mishap> {
@@ -86,7 +88,11 @@ fn validate_sender(settings: &Settings, mail: &ParsedMail) -> Result<(), Mishap>
     }
 }
 
-fn read_post(settings: &Settings, mail: ParsedMail) -> Result<PostInfo, Mishap> {
+fn read_post(
+    settings: &Settings,
+    working_dir: &Path,
+    mail: ParsedMail,
+) -> Result<PostInfo, Mishap> {
     let sender: String = sender_name(&mail)?.unwrap_or_else(|| String::from("Someone"));
     let subject: Option<String> = mail.headers.get_first_value("Subject");
     let content: Option<String> = body(&mail)?.map(signatureblock::remove);
@@ -100,9 +106,15 @@ fn read_post(settings: &Settings, mail: ParsedMail) -> Result<PostInfo, Mishap> 
 
     let slug = slug::slugify(&title);
 
-    let conventions = Filenames::new(&settings.media_dir, &settings.s3_bucket, &date, &slug);
+    let conventions = Filenames::new(
+        &settings.web_media_path,
+        &settings.github_media_path,
+        &settings.github_post_path,
+        &date,
+        &slug,
+    );
 
-    let attachments = attachments(&conventions, settings.width, &mail)?;
+    let attachments = attachments(&conventions, working_dir, &mail)?;
 
     Ok(PostInfo::new(
         title,
@@ -110,7 +122,7 @@ fn read_post(settings: &Settings, mail: ParsedMail) -> Result<PostInfo, Mishap> 
         content,
         date,
         attachments,
-        conventions.post_filename(),
+        conventions.post_github_path(),
     ))
 }
 
@@ -185,24 +197,30 @@ fn find_attachments<'a>(mail: &'a ParsedMail<'a>) -> Vec<&'a ParsedMail<'a>> {
 
 fn attachments(
     conventions: &Filenames,
+    working_dir: &Path,
     mail: &ParsedMail,
-) -> Result<Vec<Image>, Mishap> {
+) -> Result<Vec<Attachment>, Mishap> {
     let mut images = Vec::new();
 
     for (count, part) in find_attachments(mail).iter().enumerate() {
         let ext = mime_db::extension(&part.ctype.mimetype);
 
-        let filename = conventions.attachment_fullsize_filename(count, ext);
+        // TODO: possibly need to auto re-orientate?
+
+        let filename =
+            working_dir
+                .to_owned()
+                .join(format!("{}.{}", count, ext.unwrap_or_default()));
         let bytes = part.get_body_raw()?;
         let _file = save_raw_body(&filename, bytes)?;
 
         let img = Attachment {
             file_path: filename,
-            url_path: conventions.attachment_url(count, ext)
+            url_path: conventions.attachment_markdown_url(count, ext),
+            github_path: conventions.attachment_github_path(count, ext),
         };
 
-
-        images.push( img );
+        images.push(img);
     }
 
     Ok(images)
