@@ -1,11 +1,11 @@
 use github::Github;
 use log::info;
 use mishaps::Mishap;
-
+use tempfile::TempDir;
 use clap::Parser;
+
 mod settings;
 use settings::Settings;
-
 mod blog;
 mod email;
 mod filenames;
@@ -21,9 +21,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     env_logger::init();
 
-    if !settings.media_dir.exists() {
-        std::fs::create_dir_all(&settings.media_dir).expect("creating media dir")
-    };
+    let working_dir = TempDir::new().expect("creating temporary directory");
 
     ensure_imagemagik_installed();
 

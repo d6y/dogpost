@@ -3,30 +3,21 @@ use chrono::{DateTime, Utc};
 use std::io::Write;
 use std::path::PathBuf;
 
+
 #[derive(Debug)]
 pub struct PostInfo {
     pub title: String,
     pub author: String,
     pub content: Option<String>,
     pub date: DateTime<Utc>,
-    pub attachments: Vec<Image>,
+    pub attachments: Vec<Attachment>,
     pub file_path: String,
 }
 
 #[derive(Debug)]
-pub struct Image {
-    pub file: PathBuf,
-    pub url: String,
-    pub mimetype: String,
-    pub thumbnail: Thumbnail,
-}
-
-#[derive(Debug)]
-pub struct Thumbnail {
-    pub file: PathBuf,
-    pub url: String,
-    pub width: u16,
-    pub height: u16,
+pub struct Attachment {
+    pub file_path: PathBuf,
+    pub url_path: String,
 }
 
 impl PostInfo {
@@ -35,7 +26,7 @@ impl PostInfo {
         author: String,
         content: Option<String>,
         date: DateTime<Utc>,
-        attachments: Vec<Image>,
+        attachments: Vec<Attachment>,
         file_path: String,
     ) -> PostInfo {
         PostInfo {
@@ -55,11 +46,7 @@ pub fn write(post: &PostInfo) -> Result<String, Mishap> {
     write!(markdown, "\n\n")?;
 
     for image in post.attachments.iter() {
-        write!(
-            markdown,
-            r#"<a href="{}"><img src="{}" width="{}" height="{}"></a>"#,
-            image.url, image.thumbnail.url, image.thumbnail.width, image.thumbnail.height
-        )?;
+        write!(markdown, r#"![]({})"#, image.url_path);
         write!(markdown, "\n\n")?;
     }
 
@@ -72,7 +59,10 @@ pub fn write(post: &PostInfo) -> Result<String, Mishap> {
 }
 
 fn post_meta(post: &PostInfo) -> String {
-    let featured_image = post.attachments.first().map(|img| &img.url);
+
+    // TODO: use Serde YAML
+
+    let featured_image = post.attachments.first().map(|img| &img.url_path);
 
     format!(
         r#"---
@@ -80,8 +70,7 @@ title: |
     {}
 author: {}
 date: {}
-layout: post
-comments: true
+type: post
 {}
 ---"#,
         post.title,

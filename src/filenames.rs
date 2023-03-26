@@ -4,13 +4,13 @@ use std::path::PathBuf;
 
 pub struct Filenames {
     media_dir: PathBuf,
-    bucket: String,
+    media_path: String,
     date: DateTime<Utc>,
     slug: String,
 }
 
 impl Filenames {
-    pub fn attachment_fullsize_url(&self, count: usize, ext: Option<&str>) -> String {
+    pub fn attachment_url(&self, count: usize, ext: Option<&str>) -> String {
         format!(
             "//{}/{}-{}-fullsize-{}.{}",
             self.bucket,
@@ -19,43 +19,6 @@ impl Filenames {
             count,
             ext.unwrap_or_default()
         )
-    }
-
-    pub fn attachment_thumb_url(&self, count: usize, ext: Option<&str>) -> String {
-        format!(
-            "//{}/{}-{}-thumb-{}.{}",
-            self.bucket,
-            self.date.format("%Y-%m-%d"),
-            self.slug,
-            count,
-            ext.unwrap_or_default()
-        )
-    }
-
-    pub fn attachment_fullsize_filename(&self, count: usize, ext: Option<&str>) -> PathBuf {
-        let filename = format!(
-            "{}-{}-fullsize-{}.{}",
-            self.date.format("%Y-%m-%d"),
-            self.slug,
-            count,
-            ext.unwrap_or_default()
-        );
-        let mut path = self.media_dir.clone();
-        path.push(filename);
-        path
-    }
-
-    pub fn attachment_thumb_filename(&self, count: usize, ext: Option<&str>) -> PathBuf {
-        let filename = format!(
-            "{}-{}-thumb-{}.{}",
-            self.date.format("%Y-%m-%d"),
-            self.slug,
-            count,
-            ext.unwrap_or_default()
-        );
-        let mut path = self.media_dir.clone();
-        path.push(filename);
-        path
     }
 
     pub fn post_filename(&self) -> String {

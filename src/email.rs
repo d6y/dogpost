@@ -6,7 +6,7 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 
-use super::blog::{Image, PostInfo, Thumbnail};
+use super::blog::{Attachment, PostInfo};
 use super::filenames::Filenames;
 use super::settings::Settings;
 use super::signatureblock;
@@ -185,7 +185,6 @@ fn find_attachments<'a>(mail: &'a ParsedMail<'a>) -> Vec<&'a ParsedMail<'a>> {
 
 fn attachments(
     conventions: &Filenames,
-    width: u16,
     mail: &ParsedMail,
 ) -> Result<Vec<Image>, Mishap> {
     let mut images = Vec::new();
@@ -197,22 +196,13 @@ fn attachments(
         let bytes = part.get_body_raw()?;
         let _file = save_raw_body(&filename, bytes)?;
 
-        let thumb_filename = conventions.attachment_thumb_filename(count, ext);
-        let (width, height) = thumbnail(&filename, &thumb_filename, width)?;
-
-        let thumbnail = Thumbnail {
-            file: thumb_filename,
-            url: conventions.attachment_thumb_url(count, ext),
-            width,
-            height,
+        let img = Attachment {
+            file_path: filename,
+            url_path: conventions.attachment_url(count, ext)
         };
 
-        images.push(Image {
-            file: filename,
-            url: conventions.attachment_fullsize_url(count, ext),
-            thumbnail,
-            mimetype: part.ctype.mimetype.clone(),
-        });
+
+        images.push( img );
     }
 
     Ok(images)
