@@ -1,71 +1,56 @@
 use chrono::{DateTime, Utc};
-use std::path::Path;
-use std::path::PathBuf;
 
 pub struct Filenames {
-    media_dir: PathBuf,
-    bucket: String,
+    media_path: String,
+    github_media_path: String,
+    github_post_path: String,
     date: DateTime<Utc>,
     slug: String,
 }
 
 impl Filenames {
-    pub fn attachment_fullsize_url(&self, count: usize, ext: Option<&str>) -> String {
+    pub fn attachment_markdown_url(&self, count: usize, ext: &str) -> String {
         format!(
-            "//{}/{}-{}-fullsize-{}.{}",
-            self.bucket,
+            "{}/{}-{}-{}.{}",
+            self.date.format(&self.media_path),
             self.date.format("%Y-%m-%d"),
             self.slug,
             count,
-            ext.unwrap_or_default()
+            ext
         )
     }
 
-    pub fn attachment_thumb_url(&self, count: usize, ext: Option<&str>) -> String {
+    pub fn attachment_github_path(&self, count: usize, ext: &str) -> String {
         format!(
-            "//{}/{}-{}-thumb-{}.{}",
-            self.bucket,
+            "{}/{}-{}-{}.{}",
+            self.date.format(&self.github_media_path),
             self.date.format("%Y-%m-%d"),
             self.slug,
             count,
-            ext.unwrap_or_default()
+            ext
         )
     }
 
-    pub fn attachment_fullsize_filename(&self, count: usize, ext: Option<&str>) -> PathBuf {
-        let filename = format!(
-            "{}-{}-fullsize-{}.{}",
+    pub fn post_github_path(&self) -> String {
+        format!(
+            "{}/{}-{}.md",
+            self.github_post_path,
             self.date.format("%Y-%m-%d"),
-            self.slug,
-            count,
-            ext.unwrap_or_default()
-        );
-        let mut path = self.media_dir.clone();
-        path.push(filename);
-        path
+            self.slug
+        )
     }
 
-    pub fn attachment_thumb_filename(&self, count: usize, ext: Option<&str>) -> PathBuf {
-        let filename = format!(
-            "{}-{}-thumb-{}.{}",
-            self.date.format("%Y-%m-%d"),
-            self.slug,
-            count,
-            ext.unwrap_or_default()
-        );
-        let mut path = self.media_dir.clone();
-        path.push(filename);
-        path
-    }
-
-    pub fn post_filename(&self) -> String {
-        format!("{}-{}.md", self.date.format("%Y-%m-%d"), self.slug)
-    }
-
-    pub fn new(media_dir: &Path, bucket: &str, date: &DateTime<Utc>, slug: &str) -> Filenames {
+    pub fn new(
+        media_path: &str,
+        github_media_path: &str,
+        github_post_path: &str,
+        date: &DateTime<Utc>,
+        slug: &str,
+    ) -> Filenames {
         Filenames {
-            media_dir: media_dir.to_path_buf(),
-            bucket: bucket.to_string(),
+            media_path: media_path.to_owned(),
+            github_media_path: github_media_path.to_owned(),
+            github_post_path: github_post_path.to_owned(),
             date: *date,
             slug: slug.to_string(),
         }

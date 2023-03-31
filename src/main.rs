@@ -1,18 +1,18 @@
-use github::Github;
+use clap::Parser;
+use github::{Github, NewContent};
 use log::info;
 use mishaps::Mishap;
+use tempfile::TempDir;
 
-use clap::Parser;
 mod settings;
 use settings::Settings;
-
 mod blog;
 mod email;
+mod tag;
 mod filenames;
 mod github;
 mod image;
 mod mishaps;
-mod s3;
 mod signatureblock;
 
 #[tokio::main]
@@ -21,11 +21,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     env_logger::init();
 
-    if !settings.media_dir.exists() {
-        std::fs::create_dir_all(&settings.media_dir).expect("creating media dir")
-    };
+    let working_dir = TempDir::new().expect("creating temporary directory");
 
-    ensure_imagemagik_installed();
+    // ensure_imagemagik_installed();
 
     let gh = Github::new(
         &settings.github_token,
@@ -33,7 +31,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         &settings.github_branch,
     );
 
-    let extract = |msg| email::extract(&settings, msg);
+    let extract = |msg| email::extract(&settings, working_dir.path(), msg);
 
     match email::fetch(&settings) {
         Err(err) => stop("mailbox access", err), // Failed accessing mail box
@@ -43,11 +41,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Err(err) => stop("msg parse", err), // Message processing failed
                 Ok(info) => match blog::write(&info) {
                     Err(err) => stop("Blog write", err),
-                    Ok(content) => {
-                        let path_name = format!("{}/{}", &settings.github_path, info.file_path);
+                    Ok(markdown) => {
                         let commit_msg = format!("add post: {}", info.title);
-                        gh.commit(&path_name, &content, &commit_msg).await?;
-                        s3::upload(&settings, &info).await?
+
+                        let mut contents: Vec<NewContent> = info
+                            .attachments
+                            .iter()
+                            .map(|a| NewContent::path(&a.github_path, &a.file_path))
+                            .collect();
+                        contents.push(NewContent::text(&info.file_path, &markdown));
+
+                        gh.commit(&commit_msg, &contents).await?;
                     }
                 },
             }

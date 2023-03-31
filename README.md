@@ -2,28 +2,18 @@
 
 Converts an email into a blog post.
 
-Reads an IMAP email account, writes attachments to S3, and commits a Jekyll-style markdown post file to Github.
+Reads an IMAP email account, and commits a Hugo-style markdown post and images files to Github.
 
 ## How use use
 
-You need to supply:
+```
+dogpost [OPTIONS] --imap-user <IMAP_USER> --imap-password <IMAP_PASSWORD> --github-token <GITHUB_TOKEN> --github-repo <GITHUB_REPO>
+```
 
-- paths to write the markdown blog post and image files
-- Google email address and password
-- S3 bucket name, key, secret (as environment variables only)
-- Github personal token, repository (user, branch)
-
-The subject is used as the title of the blog post and the filename. 
-
-## Serving suggestion
+For more clues:
 
 ```
-AWS_ACCESS_KEY_ID=??? AWS_SECRET_ACCESS_KEY=??? cargo run -- \
-  --imap-password 1234 --imap-user you@example.org \
-  --media-dir ./tmp --s3-bucket static.example.com \
-  --github-token ??? --github-repo user/repo --github-branch main \
-  --github-path _posts \
-  --expurge
+cargo run -- --help
 ```
 
 NB: `--expurge` will archive/delete the email after processing.

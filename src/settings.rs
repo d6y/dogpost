@@ -1,5 +1,4 @@
 use clap::Parser;
-use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]
@@ -24,21 +23,9 @@ pub struct Settings {
     #[arg(short, long, default_value = "INBOX", env = "MAILBOX")]
     pub mailbox: String,
 
-    /// Temporary directory for writing media files prior to upload
-    #[arg(long, env = "MEDIA_DIR")]
-    pub media_dir: PathBuf,
-
-    /// Thumbnail width
-    #[arg(short, long, default_value = "500")]
-    pub width: u16,
-
     /// Archive the email after processing
     #[arg(short, long, env = "EXPURGE")]
     pub expunge: bool,
-
-    /// S3 bucketname
-    #[arg(long, env = "S3_BUCKET")]
-    pub s3_bucket: String,
 
     /// Allow list of sender domains. If empty, all are allowed.
     #[arg(long, env = "DOMAINS_ALLOW")]
@@ -57,6 +44,14 @@ pub struct Settings {
     pub github_branch: String,
 
     /// Path in GitHub repostory for writing blog content (e.g., _posts)
-    #[arg(long, env = "GITHUB_PATH", default_value = "_posts")]
-    pub github_path: String,
+    #[arg(long, env = "GITHUB_POST_PATH", default_value = "content/posts")]
+    pub github_post_path: String,
+
+    /// Path in GitHub repostory for writing image content (e.g., img/posts)
+    #[arg(long, env = "GITHUB_MEDIA_PATH", default_value = "static/media/%Y/%m")]
+    pub github_media_path: String,
+
+    /// Path to media folder for images on the web server
+    #[arg(long, env = "GITHUB_MEDIA_PATH", default_value = "/media/%Y/%m")]
+    pub web_media_path: String,
 }
