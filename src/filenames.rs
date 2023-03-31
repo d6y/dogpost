@@ -9,25 +9,25 @@ pub struct Filenames {
 }
 
 impl Filenames {
-    pub fn attachment_markdown_url(&self, count: usize, ext: Option<&str>) -> String {
+    pub fn attachment_markdown_url(&self, count: usize, ext: &str) -> String {
         format!(
             "{}/{}-{}-{}.{}",
             self.date.format(&self.media_path),
             self.date.format("%Y-%m-%d"),
             self.slug,
             count,
-            ext.unwrap_or_default()
+            ext
         )
     }
 
-    pub fn attachment_github_path(&self, count: usize, ext: Option<&str>) -> String {
+    pub fn attachment_github_path(&self, count: usize, ext: &str) -> String {
         format!(
             "{}/{}-{}-{}.{}",
             self.date.format(&self.github_media_path),
             self.date.format("%Y-%m-%d"),
             self.slug,
             count,
-            ext.unwrap_or_default()
+            ext
         )
     }
 

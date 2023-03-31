@@ -19,7 +19,7 @@ serde = { version = "1", features = ["derive"] }
 reqwest = { version = "0.11", default_features = false, features = ["rustls-tls", "json"] }
 
 mailparse = "0.14"
-mime-db = "1"
+mime_guess = "2"
 imap = { version = "3.0.0-alpha.9", default-features = false, features=["rustls-tls"]  }
 
 futures = "0.3"

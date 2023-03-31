@@ -99,10 +99,12 @@ fn read_post(
     let date: DateTime<Utc> = date(&mail)?.unwrap_or_else(Utc::now);
 
     // The blog post title will be the subject line, and if that's missing use the body text
-    let title = subject
+    let raw_title = subject
         .filter(|str| !str.is_empty())
         .or_else(|| content.clone())
         .unwrap_or_else(|| String::from("Untitled"));
+
+    let (title, tags) = crate::tag::detag(&raw_title);
 
     let slug = slug::slugify(&title);
 
@@ -121,6 +123,7 @@ fn read_post(
         sender,
         content,
         date,
+        tags,
         attachments,
         conventions.post_github_path(),
     ))
@@ -186,6 +189,11 @@ fn to_vec<T>(o: Option<T>) -> Vec<T> {
 }
 
 fn find_attachments<'a>(mail: &'a ParsedMail<'a>) -> Vec<&'a ParsedMail<'a>> {
+    // If you want to include video, but it's HUUUGE and doesn't render well. Not yet.
+    // let head: Vec<&ParsedMail> = to_vec(Some(mail).filter(|m| {
+    //     m.ctype.mimetype.starts_with("image") || m.ctype.mimetype.starts_with("video")
+    // }));
+
     let head: Vec<&ParsedMail> =
         to_vec(Some(mail).filter(|m| m.ctype.mimetype.starts_with("image")));
 
@@ -202,14 +210,12 @@ fn attachments(
     let mut images = Vec::new();
 
     for (count, part) in find_attachments(mail).iter().enumerate() {
-        let ext = mime_db::extension(&part.ctype.mimetype);
+        let exts = mime_guess::get_mime_extensions_str(&part.ctype.mimetype);
+        let ext = exts.and_then(|xs| xs.first()).unwrap_or(&"");
 
         // TODO: possibly need to auto re-orientate?
 
-        let filename =
-            working_dir
-                .to_owned()
-                .join(format!("{}.{}", count, ext.unwrap_or_default()));
+        let filename = working_dir.to_owned().join(format!("{}.{}", count, ext));
         let bytes = part.get_body_raw()?;
         let _file = save_raw_body(&filename, bytes)?;
 

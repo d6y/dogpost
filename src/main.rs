@@ -8,6 +8,7 @@ mod settings;
 use settings::Settings;
 mod blog;
 mod email;
+mod tag;
 mod filenames;
 mod github;
 mod image;
