@@ -1,5 +1,5 @@
 use clap::Parser;
-use github::Github;
+use github::{Github, NewContent};
 use log::info;
 use mishaps::Mishap;
 use tempfile::TempDir;
@@ -22,7 +22,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let working_dir = TempDir::new().expect("creating temporary directory");
 
-    ensure_imagemagik_installed();
+    // ensure_imagemagik_installed();
 
     let gh = Github::new(
         &settings.github_token,
@@ -40,11 +40,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Err(err) => stop("msg parse", err), // Message processing failed
                 Ok(info) => match blog::write(&info) {
                     Err(err) => stop("Blog write", err),
-                    Ok(content) => {
-                        let path_name =
-                            format!("{}/{}", &settings.github_post_path, info.file_path);
+                    Ok(markdown) => {
                         let commit_msg = format!("add post: {}", info.title);
-                        gh.commit(&path_name, &content, &commit_msg).await?;
+
+                        let mut contents: Vec<NewContent> = info
+                            .attachments
+                            .iter()
+                            .map(|a| NewContent::path(&a.github_path, &a.file_path))
+                            .collect();
+                        contents.push(NewContent::text(&info.file_path, &markdown));
+
+                        gh.commit(&commit_msg, &contents).await?;
                     }
                 },
             }

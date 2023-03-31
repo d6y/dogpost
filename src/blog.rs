@@ -1,5 +1,6 @@
 use super::mishaps::Mishap;
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 use std::io::Write;
 use std::path::PathBuf;
 
@@ -40,12 +41,23 @@ impl PostInfo {
     }
 }
 
+#[derive(Serialize, Deserialize)]
+struct FrontMatter {
+    title: String,
+    author: String,
+    date: String,
+    image: Option<String>,
+    #[serde(rename = "type")]
+    post_type: String,
+}
+
 pub fn write(post: &PostInfo) -> Result<String, Mishap> {
     let mut markdown = Vec::new();
     write!(markdown, "{}", post_meta(post))?;
     write!(markdown, "\n\n")?;
 
     for image in post.attachments.iter() {
+        // TODO: support video
         write!(markdown, r#"![]({})"#, image.url_path)?;
         write!(markdown, "\n\n")?;
     }
@@ -59,24 +71,17 @@ pub fn write(post: &PostInfo) -> Result<String, Mishap> {
 }
 
 fn post_meta(post: &PostInfo) -> String {
-    // TODO: use Serde YAML
+    let featured_image = post.attachments.first().map(|img| &img.url_path).cloned();
 
-    let featured_image = post.attachments.first().map(|img| &img.url_path);
+    let fm = FrontMatter {
+        title: post.title.to_string(),
+        author: post.author.to_string(),
+        date: post.date.format("%Y-%m-%d %H:%M:%S").to_string(),
+        image: featured_image,
+        post_type: "post".to_string(),
+    };
 
-    format!(
-        r#"---
-title: |
-    {}
-author: {}
-date: {}
-type: post
-{}
----"#,
-        post.title,
-        post.author,
-        post.date.format("%Y-%m-%d %H:%M"),
-        featured_image
-            .map(|url| format!("image: {}", url))
-            .unwrap_or_else(|| "".to_string())
-    )
+    let yaml = serde_yaml::to_string(&fm).unwrap();
+
+    format!("---\n{}\n---", yaml)
 }

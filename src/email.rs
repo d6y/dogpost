@@ -1,4 +1,4 @@
-use chrono::{DateTime, TimeZone, Utc};
+use chrono::{DateTime, LocalResult, TimeZone, Utc};
 use log::debug;
 use mailparse::*;
 
@@ -131,8 +131,7 @@ fn date(mail: &ParsedMail) -> Result<Option<DateTime<Utc>>, Mishap> {
         None => Ok(None),
         Some(str) => dateparse(&str)
             .map_err(|e| Mishap::EmailField(e.to_string()))
-            .map(|seconds| Utc.timestamp_millis(1000_i64 * seconds))
-            .map(Some),
+            .map(|seconds| LocalResult::single(Utc.timestamp_millis_opt(1000_i64 * seconds))),
     }
 }
 
