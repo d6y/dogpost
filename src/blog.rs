@@ -1,17 +1,20 @@
 use crate::tag::Tag;
 
 use super::mishaps::Mishap;
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use std::fmt::Debug;
 use std::io::Write;
 use std::path::PathBuf;
+use time::OffsetDateTime;
+use time::format_description::well_known::Iso8601;
+
 
 #[derive(Debug)]
 pub struct PostInfo {
     pub title: String,
     pub author: String,
     pub content: Option<String>,
-    pub date: DateTime<Utc>,
+    pub date: OffsetDateTime,
     pub attachments: Vec<Attachment>,
     pub file_path: String,
     pub tags: Vec<Tag>,
@@ -22,7 +25,7 @@ impl PostInfo {
         title: String,
         author: String,
         content: Option<String>,
-        date: DateTime<Utc>,
+        date: OffsetDateTime,
         tags: Vec<Tag>,
         attachments: Vec<Attachment>,
         file_path: String,
@@ -133,7 +136,7 @@ fn post_meta(post: &PostInfo) -> String {
     let fm = FrontMatter {
         title: post.title.to_string(),
         author: post.author.to_string(),
-        date: post.date.format("%Y-%m-%d %H:%M:%S").to_string(),
+        date: post.date.format(&Iso8601::DEFAULT).unwrap(),
         image: featured_image,
         post_type: "post".to_string(),
         tags: post.tags.clone(),

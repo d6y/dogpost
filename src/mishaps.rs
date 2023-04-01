@@ -12,6 +12,9 @@ pub enum Mishap {
     EmailField(String),
 
     #[error(transparent)]
+    DateOutOfRange(#[from] time::error::ComponentRange),
+
+    #[error(transparent)]
     PostEncoding(#[from] std::string::FromUtf8Error),
 
     #[error(transparent)]
@@ -22,4 +25,5 @@ pub enum Mishap {
 
     #[error("Sender {0} not in allowed list of domains")]
     Unauthorised(String),
+
 }

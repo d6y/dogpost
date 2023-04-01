@@ -56,6 +56,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                             .collect();
                         contents.push(NewContent::text(&info.file_path, &markdown));
 
+                        // dbg!(&contents);
+
                         gh.commit(&commit_msg, &contents).await?;
                     }
                 },

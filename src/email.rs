@@ -1,10 +1,10 @@
-use chrono::{DateTime, LocalResult, TimeZone, Utc};
 use log::debug;
 use mailparse::*;
 
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
+use time::OffsetDateTime;
 
 use super::blog::{Attachment, PostInfo};
 use super::filenames::Filenames;
@@ -96,7 +96,7 @@ fn read_post(
     let sender: String = sender_name(&mail)?.unwrap_or_else(|| String::from("Someone"));
     let subject: Option<String> = mail.headers.get_first_value("Subject");
     let content: Option<String> = body(&mail)?.map(signatureblock::remove);
-    let date: DateTime<Utc> = date(&mail)?.unwrap_or_else(Utc::now);
+    let date: OffsetDateTime = date(&mail)?.unwrap_or_else(OffsetDateTime::now_utc);
 
     // The blog post title will be the subject line, and if that's missing use the body text
     let raw_title = subject
@@ -129,14 +129,19 @@ fn read_post(
     ))
 }
 
-fn date(mail: &ParsedMail) -> Result<Option<DateTime<Utc>>, Mishap> {
+fn date(mail: &ParsedMail) -> Result<Option<OffsetDateTime>, Mishap> {
     match mail.headers.get_first_value("Date") {
         None => Ok(None),
-        Some(str) => dateparse(&str)
-            .map_err(|e| Mishap::EmailField(e.to_string()))
-            .map(|seconds| LocalResult::single(Utc.timestamp_millis_opt(1000_i64 * seconds))),
+        Some(str) => date_parse(&str),
     }
 }
+
+fn date_parse(str: &str) -> Result<Option<OffsetDateTime>, Mishap> {
+    let unix_seconds = dateparse(str).map_err(|e| Mishap::EmailField(e.to_string()))?;
+    let dt = OffsetDateTime::from_unix_timestamp_nanos(unix_seconds as i128 * 1000000000_i128)?;
+    Ok(Some(dt))
+}
+
 
 fn walk_from_header<F>(mail: &ParsedMail, pick: F) -> Result<Option<String>, MailParseError>
 where
