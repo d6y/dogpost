@@ -2,7 +2,7 @@ use std::io::{Error, ErrorKind};
 use std::path::Path;
 use std::process::Command;
 
-pub fn thumbnail(source: &Path, target: &Path, width: u16) -> Result<(u16, u16), Error> {
+fn _thumbnail(source: &Path, target: &Path, width: u16) -> Result<(u16, u16), Error> {
     let _convert_status = Command::new("convert")
         .arg(source)
         .arg("-resize")
@@ -32,8 +32,7 @@ pub fn thumbnail(source: &Path, target: &Path, width: u16) -> Result<(u16, u16),
     }
 }
 
-pub fn imagemagic_installed() -> bool {
+pub fn imagemagick_installed() -> bool {
     let convert_status = Command::new("convert").arg("-version").output();
-
     convert_status.is_ok()
 }

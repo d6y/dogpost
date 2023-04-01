@@ -30,3 +30,8 @@ pub fn web_video(input_path: &Path, output_path: &Path) -> Result<(), Mishap> {
         .output()?;
     Ok(())
 }
+
+pub fn ffmpeg_installed() -> bool {
+    let status = Command::new("ffmpeg").arg("-version").output();
+    status.is_ok()
+}

@@ -19,13 +19,13 @@ mod video;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let settings = Settings::parse();
-
     env_logger::init();
 
-    let working_dir = TempDir::new().expect("creating temporary directory");
+    ensure_imagemagick_installed();
+    ensure_ffmpeg_installed();
 
-    ensure_imagemagik_installed();
+    let working_dir = TempDir::new().expect("creating temporary directory");
+    let settings = Settings::parse();
 
     let gh = Github::new(
         &settings.github_token,
@@ -76,8 +76,14 @@ fn complete(num_msgs: usize) -> ! {
     std::process::exit(0)
 }
 
-fn ensure_imagemagik_installed() {
-    if !image::imagemagic_installed() {
-        panic!("Did not find ImageMagik");
+fn ensure_imagemagick_installed() {
+    if !image::imagemagick_installed() {
+        panic!("Did not find ImageMagick");
+    }
+}
+
+fn ensure_ffmpeg_installed() {
+    if !video::ffmpeg_installed() {
+        panic!("Did not find ffmpeg");
     }
 }
