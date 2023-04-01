@@ -1,6 +1,5 @@
-
-use time::{OffsetDateTime, format_description};
 use time::macros::format_description;
+use time::{format_description, OffsetDateTime};
 
 pub struct Filenames {
     media_path: String,
@@ -11,10 +10,7 @@ pub struct Filenames {
 }
 
 impl Filenames {
-
-
     pub fn attachment_markdown_url(&self, count: usize, ext: &str) -> String {
-
         // TODO: propagate parsing up to command line parsing
         let path_format = format_description::parse(&self.media_path).unwrap();
 
@@ -22,7 +18,9 @@ impl Filenames {
         format!(
             "{}/{}-{}-{}.{}",
             self.date.format(&path_format).unwrap(),
-            self.date.format(format_description!("[year]-[month]-[day]")).unwrap(),
+            self.date
+                .format(format_description!("[year]-[month]-[day]"))
+                .unwrap(),
             self.slug,
             count,
             ext
@@ -30,13 +28,14 @@ impl Filenames {
     }
 
     pub fn attachment_github_path(&self, count: usize, ext: &str) -> String {
-
         let path_format = format_description::parse(&self.github_media_path).unwrap();
- 
+
         format!(
             "{}/{}-{}-{}.{}",
             self.date.format(&path_format).unwrap(),
-            self.date.format(format_description!("[year]-[month]-[day]")).unwrap(),
+            self.date
+                .format(format_description!("[year]-[month]-[day]"))
+                .unwrap(),
             self.slug,
             count,
             ext
@@ -47,7 +46,9 @@ impl Filenames {
         format!(
             "{}/{}-{}.md",
             self.github_post_path,
-            self.date.format(format_description!("[year]-[month]-[day]")).unwrap(),
+            self.date
+                .format(format_description!("[year]-[month]-[day]"))
+                .unwrap(),
             self.slug
         )
     }

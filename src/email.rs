@@ -142,7 +142,6 @@ fn date_parse(str: &str) -> Result<Option<OffsetDateTime>, Mishap> {
     Ok(Some(dt))
 }
 
-
 fn walk_from_header<F>(mail: &ParsedMail, pick: F) -> Result<Option<String>, MailParseError>
 where
     F: Fn(SingleInfo) -> Option<String>,

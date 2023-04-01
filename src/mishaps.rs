@@ -25,5 +25,4 @@ pub enum Mishap {
 
     #[error("Sender {0} not in allowed list of domains")]
     Unauthorised(String),
-
 }

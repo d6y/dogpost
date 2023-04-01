@@ -48,10 +48,18 @@ pub struct Settings {
     pub github_post_path: String,
 
     /// Path in GitHub repostory for writing image content (e.g., img/posts)
-    #[arg(long, env = "GITHUB_MEDIA_PATH", default_value = "static/media/[year]/[month]")]
+    #[arg(
+        long,
+        env = "GITHUB_MEDIA_PATH",
+        default_value = "static/media/[year]/[month]"
+    )]
     pub github_media_path: String,
 
     /// Path to media folder for images on the web server
-    #[arg(long, env = "GITHUB_MEDIA_PATH", default_value = "/media/[year]/[month]")]
+    #[arg(
+        long,
+        env = "GITHUB_MEDIA_PATH",
+        default_value = "/media/[year]/[month]"
+    )]
     pub web_media_path: String,
 }
