@@ -8,12 +8,14 @@ mod settings;
 use settings::Settings;
 mod blog;
 mod email;
-mod tag;
 mod filenames;
 mod github;
 mod image;
+mod media;
 mod mishaps;
 mod signatureblock;
+mod tag;
+mod video;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -23,7 +25,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let working_dir = TempDir::new().expect("creating temporary directory");
 
-    // ensure_imagemagik_installed();
+    ensure_imagemagik_installed();
 
     let gh = Github::new(
         &settings.github_token,
@@ -37,7 +39,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Err(err) => stop("mailbox access", err), // Failed accessing mail box
         Ok(None) => complete(0),                 // No messages to process
         Ok(Some(mime_message)) => {
-            match email::parse(&mime_message).and_then(extract) {
+            match email::parse(&mime_message)
+                .and_then(extract)
+                .and_then(media::transcode)
+            {
                 Err(err) => stop("msg parse", err), // Message processing failed
                 Ok(info) => match blog::write(&info) {
                     Err(err) => stop("Blog write", err),

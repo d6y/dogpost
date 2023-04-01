@@ -13,8 +13,8 @@ pub fn detag(subject: &str) -> (String, Vec<Tag>) {
     let (result, tags) = subject.split_whitespace().fold(
         (String::new(), Vec::new()),
         |(mut result, mut tags), word| {
-            if word.starts_with('#') {
-                tags.push(Tag::new(&word[1..]));
+            if let Some(tag) = word.strip_prefix('#') {
+                tags.push(Tag::new(tag));
             } else {
                 if !result.is_empty() {
                     result.push(' ');

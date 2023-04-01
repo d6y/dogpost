@@ -2,7 +2,6 @@ use crate::tag::Tag;
 
 use super::mishaps::Mishap;
 use chrono::{DateTime, Utc};
-use mime_guess;
 use serde::{Deserialize, Serialize};
 use std::io::Write;
 use std::path::PathBuf;
@@ -16,29 +15,6 @@ pub struct PostInfo {
     pub attachments: Vec<Attachment>,
     pub file_path: String,
     pub tags: Vec<Tag>,
-}
-
-#[derive(Debug)]
-pub struct Attachment {
-    pub file_path: PathBuf,
-    pub url_path: String,
-    pub github_path: String,
-}
-
-impl Attachment {
-    fn markdown(&self) -> Option<String> {
-        let mime_type = mime_guess::from_path(&self.file_path).first_or_octet_stream();
-        let media_type = mime_type.type_();
-
-        if media_type == mime_guess::mime::IMAGE {
-            Some(format!(r#"![]({})"#, &self.url_path))
-        } else if media_type == mime_guess::mime::VIDEO {
-            let media_path = &self.url_path;
-            Some(format!("<video height='720' controls=''><source src='{media_path}' type='{media_type}'></video>"))
-        } else {
-            None
-        }
-    }
 }
 
 impl PostInfo {
@@ -59,6 +35,59 @@ impl PostInfo {
             date,
             attachments,
             file_path,
+        }
+    }
+
+    pub fn map_attachments<F>(self, f: F) -> Result<PostInfo, Mishap>
+    where
+        F: Fn(Attachment) -> Result<Attachment, Mishap>,
+    {
+        let mut mapped_attachments = Vec::new();
+        for attachment in self.attachments.into_iter() {
+            let mapped_attachment = f(attachment)?;
+            mapped_attachments.push(mapped_attachment);
+        }
+
+        Ok(PostInfo {
+            title: self.title,
+            author: self.author,
+            content: self.content,
+            date: self.date,
+            attachments: mapped_attachments,
+            file_path: self.file_path,
+            tags: self.tags,
+        })
+    }
+}
+
+#[derive(Debug)]
+pub struct Attachment {
+    pub file_path: PathBuf,
+    pub url_path: String,
+    pub github_path: String,
+    pub mime_type: String,
+}
+
+impl Attachment {
+    fn is_image(&self) -> bool {
+        self.mime_type.starts_with("image/")
+    }
+
+    pub fn is_video(&self) -> bool {
+        self.mime_type.starts_with("video/")
+    }
+
+    fn markdown(&self) -> Option<String> {
+        if self.is_image() {
+            Some(format!(r#"![]({})"#, &self.url_path))
+        } else if self.is_video() {
+            let media_path = &self.url_path;
+            let media_type = &self.mime_type;
+            Some(format!(
+                "<video controls=''><source src='{media_path}' type='{media_type}'></video>"
+            ))
+        } else {
+            None
         }
     }
 }

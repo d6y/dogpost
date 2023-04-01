@@ -188,14 +188,35 @@ fn to_vec<T>(o: Option<T>) -> Vec<T> {
     }
 }
 
-fn find_attachments<'a>(mail: &'a ParsedMail<'a>) -> Vec<&'a ParsedMail<'a>> {
-    // If you want to include video, but it's HUUUGE and doesn't render well. Not yet.
-    // let head: Vec<&ParsedMail> = to_vec(Some(mail).filter(|m| {
-    //     m.ctype.mimetype.starts_with("image") || m.ctype.mimetype.starts_with("video")
-    // }));
+trait MediatTypeDetection {
+    fn is_image(&self) -> bool;
+    fn is_video(&self) -> bool;
+    fn mime(&self) -> String;
+    fn guess_ext(&self) -> String;
+}
 
-    let head: Vec<&ParsedMail> =
-        to_vec(Some(mail).filter(|m| m.ctype.mimetype.starts_with("image")));
+impl<'a> MediatTypeDetection for ParsedMail<'a> {
+    fn is_image(&self) -> bool {
+        self.ctype.mimetype.starts_with("image")
+    }
+
+    fn is_video(&self) -> bool {
+        self.ctype.mimetype.starts_with("video")
+    }
+
+    fn mime(&self) -> String {
+        self.ctype.mimetype.clone()
+    }
+
+    fn guess_ext(&self) -> String {
+        let exts = mime_guess::get_mime_extensions_str(&self.mime());
+        let ext = exts.and_then(|xs| xs.first()).unwrap_or(&"");
+        ext.to_string()
+    }
+}
+
+fn find_attachments<'a>(mail: &'a ParsedMail<'a>) -> Vec<&'a ParsedMail<'a>> {
+    let head: Vec<&ParsedMail> = to_vec(Some(mail).filter(|m| m.is_image() || m.is_video()));
 
     let tail = mail.subparts.iter().flat_map(find_attachments);
 
@@ -210,10 +231,7 @@ fn attachments(
     let mut images = Vec::new();
 
     for (count, part) in find_attachments(mail).iter().enumerate() {
-        let exts = mime_guess::get_mime_extensions_str(&part.ctype.mimetype);
-        let ext = exts.and_then(|xs| xs.first()).unwrap_or(&"");
-
-        // TODO: possibly need to auto re-orientate?
+        let ext = part.guess_ext();
 
         let filename = working_dir.to_owned().join(format!("{}.{}", count, ext));
         let bytes = part.get_body_raw()?;
@@ -221,8 +239,9 @@ fn attachments(
 
         let img = Attachment {
             file_path: filename,
-            url_path: conventions.attachment_markdown_url(count, ext),
-            github_path: conventions.attachment_github_path(count, ext),
+            url_path: conventions.attachment_markdown_url(count, &ext),
+            github_path: conventions.attachment_github_path(count, &ext),
+            mime_type: part.mime(),
         };
 
         images.push(img);
