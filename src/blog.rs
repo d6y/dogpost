@@ -84,10 +84,7 @@ impl Attachment {
             Some(format!(r#"![]({})"#, &self.url_path))
         } else if self.is_video() {
             let media_path = &self.url_path;
-            let media_type = &self.mime_type;
-            Some(format!(
-                "<video controls=''><source src='{media_path}' type='{media_type}'></video>"
-            ))
+            Some(format!(r#"{{< video src="{}" >}}"#, media_path))
         } else {
             None
         }
