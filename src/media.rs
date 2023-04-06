@@ -1,16 +1,31 @@
 use crate::{
     blog::{Attachment, PostInfo},
+    image,
     mishaps::Mishap,
     video,
 };
 
 pub fn transcode(info: PostInfo) -> Result<PostInfo, Mishap> {
-    let has_videos = info.attachments.iter().any(|a| a.is_video());
+    info.map_attachments(transcode_video_for_web)?
+        .map_attachments(transcode_heic)
+}
 
-    if !has_videos {
-        Ok(info)
+fn transcode_heic(a: Attachment) -> Result<Attachment, Mishap> {
+    let target_mime_type = "image/jpeg";
+    let target_ext = "jpg";
+
+    if !a.is_image() || a.mime_type == target_mime_type {
+        Ok(a)
     } else {
-        info.map_attachments(transcode_video_for_web)
+        let input_path = &a.file_path;
+        let output_path = &a.file_path.with_extension(target_ext);
+        image::to_jpeg(input_path, output_path)?;
+        Ok(Attachment {
+            file_path: output_path.to_owned(),
+            url_path: a.url_path.with_extension(target_ext),
+            github_path: a.github_path.with_extension(target_ext),
+            mime_type: target_mime_type.to_string(),
+        })
     }
 }
 
@@ -32,8 +47,12 @@ fn transcode_video_for_web(a: Attachment) -> Result<Attachment, Mishap> {
     }
 }
 
-trait RenameExt {
+pub trait RenameExt
+where
+    Self: Sized,
+{
     fn with_extension(self, new_ext: &str) -> Self;
+    fn get_extension(&self) -> Option<&str>;
 }
 
 impl RenameExt for String {
@@ -42,5 +61,9 @@ impl RenameExt for String {
             self.replace_range(pos + 1.., new_ext)
         }
         self
+    }
+
+    fn get_extension(&self) -> Option<&str> {
+        self.rfind('.').map(|i| &self[i + 1..])
     }
 }

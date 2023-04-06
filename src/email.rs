@@ -8,6 +8,7 @@ use time::OffsetDateTime;
 
 use super::blog::{Attachment, PostInfo};
 use super::filenames::Filenames;
+use super::media::RenameExt;
 use super::settings::Settings;
 use super::signatureblock;
 
@@ -201,21 +202,63 @@ trait MediatTypeDetection {
 
 impl<'a> MediatTypeDetection for ParsedMail<'a> {
     fn is_image(&self) -> bool {
-        self.ctype.mimetype.starts_with("image")
+        let filename_looks_like_image = || match self.ctype.params.get("name") {
+            Some(name) => name.to_lowercase().ends_with("heic"),
+            None => false,
+        };
+
+        self.ctype.mimetype.starts_with("image") || filename_looks_like_image()
     }
 
     fn is_video(&self) -> bool {
-        self.ctype.mimetype.starts_with("video")
+        let filename_looks_like_video = || match self.ctype.params.get("name") {
+            Some(name) => name.to_lowercase().ends_with("mp4"),
+            None => false,
+        };
+
+        self.ctype.mimetype.starts_with("video") || filename_looks_like_video()
     }
 
     fn mime(&self) -> String {
-        self.ctype.mimetype.clone()
+        // HEIC files aren't guessed correctly (as of mime_giess 2.0.4)
+        if self
+            .ctype
+            .params
+            .get("name")
+            .iter()
+            .any(|n| n.to_lowercase().ends_with("heic"))
+        {
+            String::from("image/heic")
+        } else {
+            let maybe_from_filenme = || {
+                self.ctype
+                    .params
+                    .get("name")
+                    .and_then(|n| mime_guess::from_path(n).first())
+                    .map(|g| g.to_string())
+            };
+            if self.ctype.mimetype == "application/octet-stream" {
+                maybe_from_filenme().unwrap_or(self.ctype.mimetype.clone())
+            } else {
+                self.ctype.mimetype.clone()
+            }
+        }
     }
 
     fn guess_ext(&self) -> String {
-        let exts = mime_guess::get_mime_extensions_str(&self.mime());
-        let ext = exts.and_then(|xs| xs.first()).unwrap_or(&"");
-        ext.to_string()
+        match &self
+            .ctype
+            .params
+            .get("name")
+            .and_then(|n| n.get_extension())
+        {
+            Some(ext) => ext.to_string(),
+            None => {
+                let exts = mime_guess::get_mime_extensions_str(&self.mime());
+                let ext = exts.and_then(|xs| xs.first()).unwrap_or(&"");
+                ext.to_string()
+            }
+        }
     }
 }
 

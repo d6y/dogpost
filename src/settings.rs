@@ -62,4 +62,8 @@ pub struct Settings {
         default_value = "/media/[year]/[month]"
     )]
     pub web_media_path: String,
+
+    /// Don't commit the files to Github
+    #[arg(long)]
+    pub dry_run: bool,
 }

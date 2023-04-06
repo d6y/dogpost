@@ -71,7 +71,7 @@ pub struct Attachment {
 }
 
 impl Attachment {
-    fn is_image(&self) -> bool {
+    pub fn is_image(&self) -> bool {
         self.mime_type.starts_with("image/")
     }
 
@@ -84,7 +84,7 @@ impl Attachment {
             Some(format!(r#"![]({})"#, &self.url_path))
         } else if self.is_video() {
             let media_path = &self.url_path;
-            Some(format!(r#"{{< video src="{}" >}}"#, media_path))
+            Some(format!(r#"{{{{< video src="{}" >}}}}"#, media_path))
         } else {
             None
         }
@@ -111,17 +111,17 @@ pub fn write(post: &PostInfo) -> Result<String, Mishap> {
     write!(markdown, "{}", post_meta(post))?;
     write!(markdown, "\n\n")?;
 
+    match &post.content {
+        Some(text) => write!(markdown, "{}\n\n", text)?,
+        None => {}
+    };
+
     for media in post.attachments.iter() {
         if let Some(media_md) = media.markdown() {
             write!(markdown, "{media_md}")?;
             write!(markdown, "\n\n")?;
         }
     }
-
-    match &post.content {
-        Some(text) => write!(markdown, "{}\n\n", text)?,
-        None => {}
-    };
 
     Ok(String::from_utf8(markdown)?)
 }

@@ -1,6 +1,8 @@
 use std::io::{Error, ErrorKind};
 use std::path::Path;
-use std::process::Command;
+use std::process::{Command, Stdio};
+
+use crate::mishaps::Mishap;
 
 fn _thumbnail(source: &Path, target: &Path, width: u16) -> Result<(u16, u16), Error> {
     let _convert_status = Command::new("convert")
@@ -30,6 +32,23 @@ fn _thumbnail(source: &Path, target: &Path, width: u16) -> Result<(u16, u16), Er
     } else {
         Ok((width_height[0], width_height[1]))
     }
+}
+
+pub fn to_jpeg(input_path: &Path, output_path: &Path) -> Result<(), Mishap> {
+    Command::new("convert")
+        .arg(input_path)
+        .arg("-quality")
+        .arg("90")
+        .arg("-define")
+        .arg("jpeg:preserve-settings")
+        .arg("-define")
+        .arg("jpeg:optimize-coding")
+        .arg(output_path)
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::inherit())
+        .output()?;
+    Ok(())
 }
 
 pub fn imagemagick_installed() -> bool {

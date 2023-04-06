@@ -16,7 +16,11 @@ For more clues:
 cargo run -- --help
 ```
 
-NB: `--expurge` will archive/delete the email after processing.
+NB: 
+
+- `--expurge` will archive/delete the email after processing.
+-  `--dry-run` will not commit files to Git.
+
 
 # Docker build
 
