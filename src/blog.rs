@@ -104,6 +104,14 @@ struct FrontMatter {
     post_type: String,
 
     tags: Vec<Tag>,
+
+    count: Count,
+}
+
+#[derive(Serialize, Deserialize)]
+struct Count {
+    images: usize,
+    videos: usize,
 }
 
 pub fn write(post: &PostInfo) -> Result<String, Mishap> {
@@ -129,6 +137,11 @@ pub fn write(post: &PostInfo) -> Result<String, Mishap> {
 fn post_meta(post: &PostInfo) -> String {
     let featured_image = post.attachments.first().map(|img| &img.url_path).cloned();
 
+    let count = Count {
+        images: post.attachments.iter().filter(|a| a.is_image()).count(),
+        videos: post.attachments.iter().filter(|a| a.is_video()).count(),
+    };
+
     let fm = FrontMatter {
         title: post.title.to_string(),
         author: post.author.to_string(),
@@ -136,6 +149,7 @@ fn post_meta(post: &PostInfo) -> String {
         image: featured_image,
         post_type: "post".to_string(),
         tags: post.tags.clone(),
+        count,
     };
 
     let yaml = serde_yaml::to_string(&fm).unwrap();
