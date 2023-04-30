@@ -64,9 +64,15 @@ impl PostInfo {
 
 #[derive(Debug)]
 pub struct Attachment {
+    // The location of content on disk:
     pub file_path: PathBuf,
+
+    // The location of the content on the web:
     pub url_path: String,
+
+    // The location of the content on GitHub:
     pub github_path: String,
+
     pub mime_type: String,
 }
 

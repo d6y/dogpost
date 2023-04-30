@@ -7,7 +7,19 @@ use crate::{
 
 pub fn transcode(info: PostInfo) -> Result<PostInfo, Mishap> {
     info.map_attachments(transcode_video_for_web)?
-        .map_attachments(transcode_heic)
+        .map_attachments(transcode_heic)?
+        .map_attachments(normalize_filenames)
+}
+
+fn normalize_filenames(a: Attachment) -> Result<Attachment, Mishap> {
+    let norm = |str: String| str.to_lowercase().replace(".jpeg", ".jpg");
+
+    Ok(Attachment {
+        file_path: a.file_path,
+        url_path: norm(a.url_path),
+        github_path: norm(a.github_path),
+        mime_type: a.mime_type,
+    })
 }
 
 fn transcode_heic(a: Attachment) -> Result<Attachment, Mishap> {
