@@ -193,14 +193,14 @@ fn to_vec<T>(o: Option<T>) -> Vec<T> {
     }
 }
 
-trait MediatTypeDetection {
+trait MediaTypeDetection {
     fn is_image(&self) -> bool;
     fn is_video(&self) -> bool;
     fn mime(&self) -> String;
     fn guess_ext(&self) -> String;
 }
 
-impl<'a> MediatTypeDetection for ParsedMail<'a> {
+impl<'a> MediaTypeDetection for ParsedMail<'a> {
     fn is_image(&self) -> bool {
         let filename_looks_like_image = || match self.ctype.params.get("name") {
             Some(name) => name.to_lowercase().ends_with("heic"),
@@ -212,7 +212,9 @@ impl<'a> MediatTypeDetection for ParsedMail<'a> {
 
     fn is_video(&self) -> bool {
         let filename_looks_like_video = || match self.ctype.params.get("name") {
-            Some(name) => name.to_lowercase().ends_with("mp4"),
+            Some(name) => {
+                name.to_lowercase().ends_with("mp4") || name.to_lowercase().ends_with("mov")
+            }
             None => false,
         };
 
@@ -263,6 +265,12 @@ impl<'a> MediatTypeDetection for ParsedMail<'a> {
 }
 
 fn find_attachments<'a>(mail: &'a ParsedMail<'a>) -> Vec<&'a ParsedMail<'a>> {
+    dbg!(
+        "Considering attachment:",
+        &mail.ctype.mimetype,
+        &mail.ctype.params.get("name")
+    );
+
     let head: Vec<&ParsedMail> = to_vec(Some(mail).filter(|m| m.is_image() || m.is_video()));
 
     let tail = mail.subparts.iter().flat_map(find_attachments);
