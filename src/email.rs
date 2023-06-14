@@ -11,6 +11,7 @@ use super::filenames::Filenames;
 use super::media::RenameExt;
 use super::settings::Settings;
 use super::signatureblock;
+use super::tag::Tag;
 
 use super::mishaps::Mishap;
 
@@ -119,12 +120,19 @@ fn read_post(
 
     let attachments = attachments(&conventions, working_dir, &mail)?;
 
+    // if there is a video attachment, add the video tag
+    let auto_tags = if attachments.iter().any(|a| a.is_video()) {
+        vec![Tag::new("video")]
+    } else {
+        vec![]
+    };
+
     Ok(PostInfo::new(
         title,
         sender,
         content,
         date,
-        tags,
+        vec![tags, auto_tags].into_iter().flatten().collect(),
         attachments,
         conventions.post_github_path(),
     ))

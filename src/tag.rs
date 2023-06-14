@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 pub struct Tag(String);
 
 impl Tag {
-    fn new(tag: &str) -> Tag {
+    pub fn new(tag: &str) -> Tag {
         Tag(tag.to_string())
     }
 }
