@@ -17,7 +17,7 @@ pub fn web_video(input_path: &Path, output_path: &Path) -> Result<(), Mishap> {
         .arg("medium")
         .arg("-vf")
         .arg("format=yuv420p")
-        .arg("scale='min(480,iw)':trunc(ow/a/2)*2")
+        // .arg("scale='min(480,iw)':trunc(ow/a/2)*2")
         .arg("-c:a")
         .arg("copy")
         .arg("-b:a")
