@@ -17,7 +17,7 @@ use super::mishaps::Mishap;
 
 pub fn fetch(settings: &Settings) -> Result<Option<String>, Mishap> {
     debug!("Fetching");
-    let client = imap::ClientBuilder::new(&settings.imap_hostname, settings.imap_port).rustls()?;
+    let client = imap::ClientBuilder::new(&settings.imap_hostname, settings.imap_port).connect()?;
 
     let mut imap_session = client
         .login(&settings.imap_user, &settings.imap_password)
@@ -230,7 +230,7 @@ impl<'a> MediaTypeDetection for ParsedMail<'a> {
     }
 
     fn mime(&self) -> String {
-        // HEIC files aren't guessed correctly (as of mime_giess 2.0.4)
+        // HEIC files aren't guessed correctly (as of mime_guess 2.0.4)
         if self
             .ctype
             .params
@@ -273,8 +273,8 @@ impl<'a> MediaTypeDetection for ParsedMail<'a> {
 }
 
 fn find_attachments<'a>(mail: &'a ParsedMail<'a>) -> Vec<&'a ParsedMail<'a>> {
-    dbg!(
-        "Considering attachment:",
+    debug!(
+        "Considering attachment: {:?}, {:?}",
         &mail.ctype.mimetype,
         &mail.ctype.params.get("name")
     );
@@ -306,6 +306,8 @@ fn attachments(
             github_path: conventions.attachment_github_path(count, &ext),
             mime_type: part.mime(),
         };
+
+        log::debug!("Found attachment: {:?}", img);
 
         images.push(img);
     }

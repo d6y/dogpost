@@ -16,7 +16,7 @@ pub fn web_video(input_path: &Path, output_path: &Path) -> Result<(), Mishap> {
         .arg("-preset")
         .arg("medium")
         .arg("-vf")
-        .arg("format=yuv420p")
+        .arg("format=yuv420p") // NB 3x the memory usage of the scale command
         // .arg("scale='min(480,iw)':trunc(ow/a/2)*2")
         .arg("-c:a")
         .arg("copy")

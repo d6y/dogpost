@@ -11,10 +11,8 @@ pub struct Filenames {
 
 impl Filenames {
     pub fn attachment_markdown_url(&self, count: usize, ext: &str) -> String {
-        // TODO: propagate parsing up to command line parsing
         let path_format = format_description::parse(&self.media_path).unwrap();
 
-        // TODO: move YMD to lazy! const
         format!(
             "{}/{}-{}-{}.{}",
             self.date.format(&path_format).unwrap(),

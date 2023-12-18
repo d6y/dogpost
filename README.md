@@ -10,17 +10,13 @@ Reads an IMAP email account, and commits a Hugo-style markdown post and images f
 dogpost [OPTIONS] --imap-user <IMAP_USER> --imap-password <IMAP_PASSWORD> --github-token <GITHUB_TOKEN> --github-repo <GITHUB_REPO>
 ```
 
-For more clues:
-
-```
-cargo run -- --help
-```
-
 NB: 
 
 - `--expurge` will archive/delete the email after processing.
--  `--dry-run` will not commit files to Git.
+- `--dry-run` will not commit files to Git, but will print information about file locations.
 
+
+Requires https://imagemagick.org to be installed.
 
 # Docker build
 

@@ -26,7 +26,12 @@ fn transcode_heic(a: Attachment) -> Result<Attachment, Mishap> {
     let target_mime_type = "image/jpeg";
     let target_ext = "jpg";
 
-    if !a.is_image() || a.mime_type == target_mime_type {
+    // Leave it alone if it's already the target image, or not JPEG-like
+    if !a.is_image()
+        || a.mime_type == target_mime_type
+        || a.mime_type == "image/gif"
+        || a.mime_type == "image/png"
+    {
         Ok(a)
     } else {
         let input_path = &a.file_path;
@@ -50,6 +55,11 @@ fn transcode_video_for_web(a: Attachment) -> Result<Attachment, Mishap> {
         let input_path = &a.file_path;
         let output_path = &a.file_path.with_extension(target_ext);
         video::web_video(input_path, output_path)?;
+
+        let output_size = std::fs::metadata(output_path)?.len();
+        let input_size = std::fs::metadata(input_path)?.len();
+        println!("Transcoded size from {} to {}", input_size, output_size);
+
         Ok(Attachment {
             file_path: output_path.to_owned(),
             url_path: a.url_path.with_extension(target_ext),
