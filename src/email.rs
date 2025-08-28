@@ -53,7 +53,7 @@ pub fn fetch(settings: &Settings) -> Result<Option<String>, Mishap> {
     Ok(Some(body))
 }
 
-pub fn parse(mime_msg: &str) -> Result<ParsedMail, Mishap> {
+pub fn parse(mime_msg: &str) -> Result<ParsedMail<'_>, Mishap> {
     let bytes = mime_msg.as_bytes();
     let result = mailparse::parse_mail(bytes)?;
     Ok(result)
