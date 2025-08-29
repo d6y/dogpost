@@ -1,12 +1,24 @@
-FROM rust:1.74.1-bullseye as cargo
-WORKDIR /usr/src/app
+FROM alpine:3.22 AS builder
+
+RUN apk add --no-cache \
+    rust \
+    cargo \
+    musl-dev \
+    gcc
+
+WORKDIR /app
 COPY . .
-RUN cargo install --path .
+RUN cargo build --release
 
-FROM debian:bullseye-slim as rt
-RUN apt-get update && apt-get install -y --no-install-recommends imagemagick && apt-get install -y --no-install-recommends ffmpeg
+FROM alpine:3.22 AS runtime
 
-RUN apt-get install -y --no-install-recommends ca-certificates
-COPY --from=cargo /usr/local/cargo/bin/dogpost /usr/local/bin/dogpost
+RUN apk add --no-cache ca-certificates imagemagick ffmpeg
+COPY --from=builder /app/target/release/dogpost /usr/local/bin/dogpost
+
+RUN addgroup -g 1000 appuser && \
+    adduser -D -s /bin/sh -u 1000 -G appuser appuser
+RUN chown appuser:appuser /usr/local/bin/dogpost
+
+USER appuser
 ENV TZ="Europe/London"
 CMD ["dogpost"]
