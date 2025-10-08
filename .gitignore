@@ -1,4 +1,7 @@
 .envrc
+mise.toml
 /target
 tmp/
 secret/
+.DS_Store
+.vscode/settings.json
