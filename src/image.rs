@@ -5,7 +5,7 @@ use std::process::{Command, Stdio};
 use crate::mishaps::Mishap;
 
 fn _thumbnail(source: &Path, target: &Path, width: u16) -> Result<(u16, u16), Error> {
-    let _convert_status = Command::new("convert")
+    let _convert_status = Command::new("magick")
         .arg(source)
         .arg("-resize")
         .arg(width.to_string())
@@ -35,7 +35,7 @@ fn _thumbnail(source: &Path, target: &Path, width: u16) -> Result<(u16, u16), Er
 }
 
 pub fn to_jpeg(input_path: &Path, output_path: &Path) -> Result<(), Mishap> {
-    Command::new("convert")
+    Command::new("magick")
         .arg(input_path)
         .arg("-quality")
         .arg("90")
@@ -52,6 +52,6 @@ pub fn to_jpeg(input_path: &Path, output_path: &Path) -> Result<(), Mishap> {
 }
 
 pub fn imagemagick_installed() -> bool {
-    let convert_status = Command::new("convert").arg("-version").output();
+    let convert_status = Command::new("magick").arg("-version").output();
     convert_status.is_ok()
 }
