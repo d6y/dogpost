@@ -1,0 +1,44 @@
+name: Dogpost
+version: "3.1.2"
+slug: dogpost
+description: Converts an email into a blog post
+url: https://github.com/d6y/dogpost
+arch:
+  - aarch64
+  - amd64
+startup: application
+boot: auto
+stdin: true
+options:
+  imap_hostname: imap.gmail.com
+  imap_port: 993
+  imap_user: null
+  imap_password: null
+  mailbox: INBOX
+  expunge: false
+  allowed_domains: []
+  github_token: null
+  github_repo: null
+  github_branch: main
+  github_post_path: content/posts
+  github_media_path: "static/media/[year]/[month]"
+  web_media_path: "/media/[year]/[month]"
+  timezone: Europe/London
+  log_level: info
+schema:
+  imap_hostname: str
+  imap_port: port
+  imap_user: str
+  imap_password: password
+  mailbox: str
+  expunge: bool
+  allowed_domains:
+    - str
+  github_token: password
+  github_repo: str
+  github_branch: str
+  github_post_path: str
+  github_media_path: str
+  web_media_path: str
+  timezone: str
+  log_level: str
